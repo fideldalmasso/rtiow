@@ -90,11 +90,11 @@ inline vec3 operator/(const vec3 &v, double t){
 	return (1/t) * v;
 }
 
-inline double punto(const vec3 &u, const vec3 &v){
+inline double producto_punto(const vec3 &u, const vec3 &v){
 	return u[0] * v[0] + u[1] * v[1] + u[2] * u[2];
 }
 
-inline vec3 cruz(const vec3 &u, const vec3 &v){
+inline vec3 producto_cruz(const vec3 &u, const vec3 &v){
 	return vec3(u[1] * v[2] - u[2] * v[1], 
 				u[2] * v[0] - u[0] * v[2],
 				u[0] * v[1] - u[1] * v[0]);
