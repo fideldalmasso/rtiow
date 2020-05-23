@@ -86,12 +86,12 @@ inline vec3 operator*(const vec3 &v, double t){                                 
 	return t * v;                                                               // llama al metodo de arriba
 }
 
-inline vec3 operator/(const vec3 &v, double t){
+inline vec3 operator/(vec3 v, double t){
 	return (1/t) * v;
 }
 
 inline double producto_punto(const vec3 &u, const vec3 &v){
-	return u[0] * v[0] + u[1] * v[1] + u[2] * u[2];
+	return u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
 }
 
 inline vec3 producto_cruz(const vec3 &u, const vec3 &v){

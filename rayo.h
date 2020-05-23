@@ -13,7 +13,7 @@ public:
 	vec3 direccion() const { return dir; }
 	
 	punto3 en(double t) const{
-		return orig + t * dir;
+		return orig + (t*dir);
 	}
 		
 public:

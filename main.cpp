@@ -5,7 +5,7 @@
 
 using namespace std;
 
-bool toca_la_esfera(const punto3& centro, double radio, const rayo &r){
+double toca_la_esfera(const punto3& centro, double radio, const rayo& r){
 	
 	/*
 	Queremos saber si un rayo toca una esfera.
@@ -28,26 +28,44 @@ bool toca_la_esfera(const punto3& centro, double radio, const rayo &r){
 	*/
 	vec3 oc = r.origen() - centro; 
 	auto a = producto_punto(r.direccion(),r.direccion());
-	auto b = 2 * producto_punto(r.direccion(), oc);
+	auto b = 2 * producto_punto(oc,r.direccion());
 	auto c = producto_punto(oc,oc) - radio*radio;
 	auto discriminante = b*b - 4*a*c;
-	return discriminante > 0;
+	
+	if(discriminante<0){
+		return -1.0;
+	}
+	else{
+		//retorna el primer valor de t para el que el rayo toca la esfera
+		//t es siempre un valor positivo en este caso
+		return (-b - sqrt(discriminante)) / (2.0 * a);
+	}
 }
 
 
 //mezcla linealmente blanco y azul dependiendo del alto (coordenada y)
 color color_de_rayo(const rayo& r){ 
 	
+	
 	punto3 centro_esfera(0,0,-1);
 	double radio_esfera = 0.5;
-	if(toca_la_esfera(centro_esfera, radio_esfera, r))
-	   return color(1,0,0);
+	auto t = toca_la_esfera(centro_esfera, radio_esfera, r);
+	
+	if(t > 0.0){
+		
+		//n es el vector normal de la esfera: n = P - C
+		vec3 n = vector_unitario(r.en(t) - centro_esfera);
+		// n es un vector unitario y todas sus componentes varian entre -1 y 1
+		// entonces tenemos que mapear sus componentes a [0,1]
+		return 0.5*color(n.x()+1, n.y()+1, n.z()+1);
+		
+	}
 	
 	vec3 direccion_unitaria = vector_unitario(r.direccion());
 	//en direccion_unitaria, la componente en y se mueve entre -1 y 1
 	//pero necesito que se mueva entre 0 y 1, asi que 
 	//mapeo [-1,1] a [0,1] de la siguiente forma
-	auto t = 0.5 * (direccion_unitaria.y() + 1.0);
+	t = 0.5 * (direccion_unitaria.y() + 1.0);
 	
 	//truco de interpolacion lineal o lerp (linear interpolation)
 	// blendedValue = (1 - t) * startValue + t.endValue,  con t entre 0 y 1

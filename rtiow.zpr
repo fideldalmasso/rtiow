@@ -19,11 +19,11 @@ current_source=main.cpp
 path_char=/
 [source]
 path=main.cpp
-cursor=18:20
+cursor=36:2
 open=true
 [source]
 path=vec3.cpp
-cursor=0:0
+cursor=0:29
 [source]
 path=rayo.cpp
 cursor=0:0
