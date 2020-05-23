@@ -55,7 +55,7 @@ public:
 
 
 //type aliases
-using point3 = vec3;
+using punto3 = vec3;
 using color = vec3;
 //--------------------------------------------------------
 //vec3 utility functions
