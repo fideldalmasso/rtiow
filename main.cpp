@@ -2,6 +2,7 @@
 #include "lista_chocable.h"
 #include "esfera.h"
 #include "color.h"
+#include "camara.h"
 #include<iostream>
 
 using namespace std;
@@ -41,41 +42,34 @@ int main() {
 	const int ancho = 400;
 	//uso (2)
 	const int alto= static_cast<int>(ancho / relacion_de_aspecto);
+	const int muestras_por_pixel  = 100;
 	
 	cout << "P3\n" << ancho << ' ' << alto << "\n255\n";
-	//uso (3)
-	auto alto_viewport = 2.0;
-	auto ancho_viewport = relacion_de_aspecto * alto_viewport;
-	auto longitud_fcoal = 1.0;					//valores de z. Es la distancia de la camara al viewport
-	
-	auto origen = punto3(0,0,0);				
-	auto horizontal = vec3(ancho_viewport,0,0); //valores de x. Es el ancho del viewport
-	auto vertical = vec3(0,alto_viewport,0);	//valores de y. Es el alto del viewport
-	auto esquina_inferior_izquierda = 	origen 
-										- horizontal/2 
-										- vertical/2 
-										- vec3(0,0,longitud_fcoal);
-	
-	
+
 	lista_chocable mundo;
 	mundo.agregar(make_shared<esfera>(punto3(0,0,-1), 0.5));
 	mundo.agregar(make_shared<esfera>(punto3(0,-100.5,-1), 100));
 	
+	camara cam;
+	
+	
 	for (int j = alto -1; j >= 0; --j) {
 		cerr << "\rScanlines remaining: " << j << ' ' << flush;
 		for (int i = 0; i < ancho; ++i) {
+			color pixel_color(0,0,0);
 			
-			auto u = double(i) / (ancho - 1);
-			auto v = double(j) / (alto - 1);
 			
-			//la direccion (vector AB) se obtiene como B-A
-			//donde B es el punto que se va moviendo sobre el plano del viewport en cada iteracion
-			rayo r(origen,    esquina_inferior_izquierda + u * horizontal + v * vertical
-							- origen);
-			
-			color color_de_pixel = color_de_rayo(r,mundo);
-
-			escribir_color(cout,color_de_pixel);
+			//el color de cada pixel es el promedio de los colores de ese pixel 
+			//junto con los colores de los pixeles que lo rodean.
+			//aqui solo se acumula la suma, pero en escribir_color, se divide
+			//por la cantidad de muestras
+			for(int s = 0; s < muestras_por_pixel; ++s){
+				auto u = (i + double_aleatorio()) / (ancho-1);
+				auto v = (j + double_aleatorio()) / (alto-1);
+				rayo r = cam.get_rayo(u,v);
+				pixel_color += color_de_rayo(r,mundo);
+			}
+			escribir_color(cout,pixel_color, muestras_por_pixel);
 		}
 	}
 	cerr << "\nDone.\n";

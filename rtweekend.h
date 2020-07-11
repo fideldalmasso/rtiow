@@ -28,7 +28,12 @@ inline double double_aleatorio(double min, double max){
 	return min + (max - min) * double_aleatorio();
 }
 	
-	
+//https://thebookofshaders.com/glossary/?search=clamp
+inline double clamp(double x, double min, double max){
+	if (x < min) return min;
+	if (x > max) return max;
+	return x;
+}
 	
 	
 	
