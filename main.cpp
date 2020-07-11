@@ -2,6 +2,7 @@
 #include "vec3.h"
 #include "color.h"
 #include "rayo.h"
+#include "chocable.h"
 
 using namespace std;
 
