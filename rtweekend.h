@@ -20,4 +20,20 @@ inline double grados_a_radianes(double grados){
 #include "rayo.h"
 #include "vec3.h"
 
+inline double double_aleatorio(){
+	return rand() / (RAND_MAX + 1.0);
+}
+	
+inline double double_aleatorio(double min, double max){
+	return min + (max - min) * double_aleatorio();
+}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 #endif

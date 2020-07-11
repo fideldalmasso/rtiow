@@ -15,7 +15,7 @@ tab_width=4
 tab_use_spaces=0
 explorer_path=.
 inherits_from=
-current_source=main.cpp
+current_source=rtweekend.h
 path_char=/
 [source]
 path=main.cpp
@@ -44,7 +44,7 @@ cursor=0:0
 open=true
 [header]
 path=rtweekend.h
-cursor=19:14
+cursor=16:25
 open=true
 [config]
 name=Debug
