@@ -1,76 +1,17 @@
-#include<iostream>
-#include "vec3.h"
+#include "rtweekend.h"
+#include "lista_chocable.h"
+#include "esfera.h"
 #include "color.h"
-#include "rayo.h"
-#include "chocable.h"
+#include<iostream>
 
 using namespace std;
 
-double toca_la_esfera(const punto3& centro, double radio, const rayo& r){
-	
-	/*
-	Queremos saber si un rayo toca una esfera.
-	ecuacion del rayo: P = O + ut
-	ecuacion de esfera: (x - C1)^2  + (y - C2)^2 + (z - C3)^2 = r^2
 
-	si tomamos a (P - C) como un vector que va desde el centro de la esfera hasta su superficie
-	ecuacion vectorial de la esfera:   (P - C) (P - C)   = r^2
+color color_de_rayo(const rayo& r, const chocable& mundo){ 
+	registro_choque registro;
 	
-	reemplazamos P por la ecuacion del rayo
-	(O + ut - C) (O + ut - C) = r^2
-	resolviendo algebraicamente
-	[u u] t^2 + [2 u (O - C)] t + [(O - C) (O - C)] - r^2 = 0
-	esto es una ecuacion cuadratica (que depende de t) con:
-	
-	a =  u . u
-	b = 2 u . (O - C) =	2 u . co
-	c = (O - C) . (O - C) = co . co
-	discriminante = b b - 4 a c
-	
-	el rayo toca la esfera si el discriminante de la ecuacion es mayor a 0
-	
-	Calculo original:
-	auto a = producto_punto(u,u);
-	auto b = 2 * producto_punto(co,u);
-	auto c = producto_punto(co,co) - radio*radio;
-	auto discriminante = b*b - 4*a*c;
-	*/
-	//Calculo simplificado:
-	vec3 co = r.origen() - centro; 
-	vec3 u = r.direccion();
-	auto a = u.longitud_cuadrada();	
-	auto medio_b = producto_punto(co,u);
-	auto c = co.longitud_cuadrada() - radio*radio;
-	auto discriminante = medio_b*medio_b - a*c;
-	
-	if(discriminante<0){
-		return -1.0;
-	}
-	else{
-		//retorna el primer valor de t para el que el rayo toca la esfera
-		//t es siempre un valor positivo en este caso
-		//return (-b - sqrt(discriminante)) / (2.0 * a); retorno anterior
-		return (-medio_b -sqrt(discriminante)) / a;
-	}
-}
-
-
-
-color color_de_rayo(const rayo& r){ 
-	
-	
-	punto3 centro_esfera(0,0,-1);
-	double radio_esfera = 0.5;
-	auto t = toca_la_esfera(centro_esfera, radio_esfera, r);
-	
-	if(t > 0.0){ //el rayo toca la esfera
-		
-		//n es el vector normal de la esfera: n = P - C
-		vec3 n = vector_unitario(r.en(t) - centro_esfera);
-		// n es un vector unitario y todas sus componentes varian entre -1 y 1
-		// entonces tenemos que mapear sus componentes a [0,1]
-		return 0.5*color(n.x()+1, n.y()+1, n.z()+1);
-		
+	if(mundo.choca(r,0,infinito, registro)){
+		return 0.5 * (registro.normal + color(1,1,1));
 	}
 	
 	//sino, dibujo el fondo
@@ -79,7 +20,7 @@ color color_de_rayo(const rayo& r){
 	//en direccion_unitaria, la componente en y se mueve entre -1 y 1
 	//pero necesito que se mueva entre 0 y 1, asi que 
 	//mapeo [-1,1] a [0,1] de la siguiente forma
-	t = 0.5 * (direccion_unitaria.y() + 1.0);
+	auto t = 0.5 * (direccion_unitaria.y() + 1.0);
 	
 	//truco de interpolacion lineal o lerp (linear interpolation)
 	// blendedValue = (1 - t) * startValue + t.endValue,  con t entre 0 y 1
@@ -116,6 +57,10 @@ int main() {
 										- vec3(0,0,longitud_fcoal);
 	
 	
+	lista_chocable mundo;
+	mundo.agregar(make_shared<esfera>(punto3(0,0,-1), 0.5));
+	mundo.agregar(make_shared<esfera>(punto3(0,-100.5,-1), 100));
+	
 	for (int j = alto -1; j >= 0; --j) {
 		cerr << "\rScanlines remaining: " << j << ' ' << flush;
 		for (int i = 0; i < ancho; ++i) {
@@ -128,7 +73,7 @@ int main() {
 			rayo r(origen,    esquina_inferior_izquierda + u * horizontal + v * vertical
 							- origen);
 			
-			color color_de_pixel = color_de_rayo(r);
+			color color_de_pixel = color_de_rayo(r,mundo);
 
 			escribir_color(cout,color_de_pixel);
 		}

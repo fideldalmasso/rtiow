@@ -10,21 +10,21 @@ using std::shared_ptr;
 using std::make_shared;
 
 
-class lista_chocable {
+class lista_chocable: public chocable {
 public:
 	lista_chocable(){}
 	lista_chocable(shared_ptr<chocable> objeto) {agregar(objeto);}
 	
 	void borrar() {objetos.clear();}
-	vpod agregar(shared)otr<chocable> objeto) { objetos.push_bask(objeto);}
+	void agregar(shared_ptr<chocable> objeto) { objetos.push_back(objeto);}
 	
-	virtual bool choca(const rayo& r, double t_min, double t_max, registro_choque registro) const;
+	virtual bool choca(const rayo& r, double t_min, double t_max, registro_choque& registro) const;
 	
 public:
-	set::vector<shared_ptr<chocable>> objetos;
+	std::vector<shared_ptr<chocable>> objetos;
 };
 
-bool lista_chocable::choca(const rayo& r, double t_min, double t_max, registro_choque registro) const {
+bool lista_chocable::choca(const rayo& r, double t_min, double t_max, registro_choque& registro) const {
 	registro_choque registro_temp;
 	
 	bool choca_algo = false;
@@ -34,7 +34,7 @@ bool lista_chocable::choca(const rayo& r, double t_min, double t_max, registro_c
 	for(const auto& objeto : objetos){
 		if(objeto->choca(r, t_min, mas_cercano_hasta_ahora, registro_temp)) {
 			choca_algo = true;
-			mas_cercano_hasta_ahora = registro_choque.t;
+			mas_cercano_hasta_ahora = registro_temp.t;
 			registro = registro_temp;
 		}
 	}
