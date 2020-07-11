@@ -12,7 +12,10 @@ color color_de_rayo(const rayo& r, const chocable& mundo){
 	registro_choque registro;
 	
 	if(mundo.choca(r,0,infinito, registro)){
-		return 0.5 * (registro.normal + color(1,1,1));
+		//objetivo es un punto aleatorio dentro de una esfera unitaria que 
+		//es tangente a la otra esfera en el punto donde el rayo la toca
+		punto3 objetivo = registro.p + registro.normal + aleatorio_en_esfera_unitaria(); 
+		return 0.5 * color_de_rayo(rayo(registro.p, objetivo - registro.p), mundo); //hago rebotar el rayo
 	}
 	
 	//sino, dibujo el fondo

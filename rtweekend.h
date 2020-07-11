@@ -17,17 +17,6 @@ inline double grados_a_radianes(double grados){
 	return grados * pi / 180;
 }
 	
-#include "rayo.h"
-#include "vec3.h"
-
-inline double double_aleatorio(){
-	return rand() / (RAND_MAX + 1.0);
-}
-	
-inline double double_aleatorio(double min, double max){
-	return min + (max - min) * double_aleatorio();
-}
-	
 //https://thebookofshaders.com/glossary/?search=clamp
 inline double clamp(double x, double min, double max){
 	if (x < min) return min;
@@ -35,10 +24,16 @@ inline double clamp(double x, double min, double max){
 	return x;
 }
 	
+inline double double_aleatorio(){
+	return rand() / (RAND_MAX + 1.0);
+}
+
+inline double double_aleatorio(double min, double max){
+	return min + (max - min) * double_aleatorio();
+}	
+//dejar estos include aca!!! sino se rompe todo mal
+#include "vec3.h"
+#include "rayo.h"
 	
-	
-	
-	
-	
-	
+
 #endif

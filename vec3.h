@@ -1,8 +1,10 @@
 #ifndef VEC3_H
 #define VEC3_H
 
-#include <cmath>
+
+#include "rtweekend.h"
 #include <iostream>
+
 
 using std::sqrt;
 using namespace std;
@@ -49,6 +51,14 @@ public:
 		return e[0]*e[0] + e[1]*e[1] + e[2]*e[2];
 	}
 	
+	inline static vec3 aleatorio(){
+		return vec3(double_aleatorio(), double_aleatorio(), double_aleatorio());
+	}
+		
+	inline static vec3 aleatorio(double min, double max){
+		return vec3(double_aleatorio(min,max),double_aleatorio(min,max),double_aleatorio(min,max));
+	}
+
 public:
 	double e[3];
 };
@@ -59,7 +69,6 @@ using punto3 = vec3;
 using color = vec3;
 //--------------------------------------------------------
 //vec3 utility functions
-
 //para usar con cout << .... por eso usa ostream. 
 //Se llama output operator overload
 inline ostream& operator<<(ostream &out, const vec3 &v){                        //cout << miVec;
@@ -104,6 +113,13 @@ inline vec3 vector_unitario(vec3 v) {
 	return v / v.longitud();
 }
 
+vec3 aleatorio_en_esfera_unitaria(){
+	while(true){
+		auto p = vec3::aleatorio(-1,1);
+		if(p.longitud_cuadrada() >= 1)  continue;
+		return p;
+	}
+}
 
 #endif
 
