@@ -30,7 +30,9 @@ bool esfera:choca(const rayo& r, double t_min, double t_max, registro_choque& re
 		if(temp < t_max && temp > t_min){ //pruebo la formula con -
 			registro.t = temp;
 			registro.p = r.en(registro.t);
-			registro.normal = (registro.p - centro) / radio;
+			
+			vec3 normal_saliente = (registro.p - centro) / radio;
+			registro.set_cara_y_normal(r,normal_saliente);
 			return true;
 		}
 		temp = (-medio_b + raiz) / a;
@@ -38,7 +40,8 @@ bool esfera:choca(const rayo& r, double t_min, double t_max, registro_choque& re
 		if(temp < t_max && temp > t_min){ //pruebo la formula con +
 			registro.t = temp;
 			registro.p = r.en(registro.t);
-			registro.normal = (registro.p - centro) / radio;
+			vec3 normal_saliente = (registro.p - centro) / radio;
+			registro.set_cara_y_normal(r,normal_saliente);
 			return true;
 		}
 	}

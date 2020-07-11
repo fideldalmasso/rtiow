@@ -15,7 +15,7 @@ tab_width=4
 tab_use_spaces=0
 explorer_path=.
 inherits_from=
-current_source=esfera.h
+current_source=chocable.h
 path_char=/
 [source]
 path=main.cpp
@@ -38,7 +38,7 @@ path=rayo.h
 cursor=12:1
 [header]
 path=chocable.h
-cursor=9:0
+cursor=12:0
 open=true
 [header]
 path=esfera.h
