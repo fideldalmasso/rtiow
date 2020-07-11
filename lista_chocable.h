@@ -1,0 +1,51 @@
+#ifndef LISTA_CHOCABLE_H
+#define LISTA_CHOCABLE_H
+
+#include "chocable.h"
+
+#include <memory>
+#include <vector>
+
+using std::shared_ptr;
+using std::make_shared;
+
+
+class lista_chocable {
+public:
+	lista_chocable(){}
+	lista_chocable(shared_ptr<chocable> objeto) {agregar(objeto);}
+	
+	void borrar() {objetos.clear();}
+	vpod agregar(shared)otr<chocable> objeto) { objetos.push_bask(objeto);}
+	
+	virtual bool choca(const rayo& r, double t_min, double t_max, registro_choque registro) const;
+	
+public:
+	set::vector<shared_ptr<chocable>> objetos;
+};
+
+bool lista_chocable::choca(const rayo& r, double t_min, double t_max, registro_choque registro) const {
+	registro_choque registro_temp;
+	
+	bool choca_algo = false;
+	
+	auto mas_cercano_hasta_ahora = t_max;
+	
+	for(const auto& objeto : objetos){
+		if(objeto->choca(r, t_min, mas_cercano_hasta_ahora, registro_temp)) {
+			choca_algo = true;
+			mas_cercano_hasta_ahora = registro_choque.t;
+			registro = registro_temp;
+		}
+	}
+	return choca_algo;
+	
+	
+}
+
+
+
+
+
+#endif
+
