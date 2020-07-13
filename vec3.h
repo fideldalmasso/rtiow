@@ -113,6 +113,7 @@ inline vec3 vector_unitario(vec3 v) {
 	return v / v.longitud();
 }
 
+//metodo1: vector dentro de esfera unitaria
 vec3 vector_en_esfera_unitaria_aleatorio(){
 	while(true){
 		auto p = vec3::aleatorio(-1,1);
@@ -120,12 +121,22 @@ vec3 vector_en_esfera_unitaria_aleatorio(){
 		return p;
 	}
 }
-	
+
+//metodo2: vector sobre la superficie de esfera unitaria
 vec3 vector_unitario_aleatorio(){
 	auto angulo = double_aleatorio(0,2*pi);
 	auto z = double_aleatorio(-1,1);
 	auto r = sqrt(1 - z*z);
 	return vec3(r*cos(angulo),r*sin(angulo),z);
+}
+
+//metodo3: vector dentro de semiesfera unitaria
+vec3 vector_en_semiesfera_unitaria_aleatorio(const vec3& normal){
+	vec3 vector_en_esfera = vector_en_esfera_unitaria_aleatorio();
+	if(producto_punto(vector_en_esfera, normal) > 0.0) // el vector esta en la misma semiesfera que la normal
+		return vector_en_esfera;
+	else
+		return -vector_en_esfera;
 }
 	
 
