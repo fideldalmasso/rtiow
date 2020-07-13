@@ -8,14 +8,17 @@
 using namespace std;
 
 
-color color_de_rayo(const rayo& r, const chocable& mundo){ 
+color color_de_rayo(const rayo& r, const chocable& mundo, int profundidad){ 
 	registro_choque registro;
 	
-	if(mundo.choca(r,0,infinito, registro)){
+	if(profundidad <= 0)
+		return color(0,0,0);
+	
+	if(mundo.choca(r,0.001,infinito, registro)){
 		//objetivo es un punto aleatorio dentro de una esfera unitaria que 
 		//es tangente a la otra esfera en el punto donde el rayo la toca
 		punto3 objetivo = registro.p + registro.normal + aleatorio_en_esfera_unitaria(); 
-		return 0.5 * color_de_rayo(rayo(registro.p, objetivo - registro.p), mundo); //hago rebotar el rayo
+		return 0.5 * color_de_rayo(rayo(registro.p, objetivo - registro.p), mundo, profundidad - 1); //hago rebotar el rayo
 	}
 	
 	//sino, dibujo el fondo
@@ -42,10 +45,11 @@ int main() {
 	
 	//uso(1)
 	const auto relacion_de_aspecto = 16.0 / 9.0;
-	const int ancho = 400;
+	const int ancho = 800;
 	//uso (2)
 	const int alto= static_cast<int>(ancho / relacion_de_aspecto);
 	const int muestras_por_pixel  = 100;
+	const int profundidad_maxima = 50;
 	
 	cout << "P3\n" << ancho << ' ' << alto << "\n255\n";
 
@@ -70,7 +74,7 @@ int main() {
 				auto u = (i + double_aleatorio()) / (ancho-1);
 				auto v = (j + double_aleatorio()) / (alto-1);
 				rayo r = cam.get_rayo(u,v);
-				pixel_color += color_de_rayo(r,mundo);
+				pixel_color += color_de_rayo(r,mundo, profundidad_maxima);
 			}
 			escribir_color(cout,pixel_color, muestras_por_pixel);
 		}
