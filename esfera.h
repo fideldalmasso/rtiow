@@ -1,16 +1,19 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
+#include "rtweekend.h"
+
 class esfera: public chocable {
 public:
 	esfera() {}
-	esfera(punto3 cen, double r) : centro(cen), radio(r) {};
+	esfera(punto3 cen, double r, shared_ptr<material> m) : centro(cen), radio(r), material_ptr(m) {};
 	
 	virtual bool choca(const rayo& r, double t_min, double t_max, registro_choque& rec) const;
 	
 public:
 	punto3 centro;
 	double radio;
+	shared_ptr<material> material_ptr;
 };
 
 
@@ -60,6 +63,7 @@ bool esfera::choca(const rayo& r, double t_min, double t_max, registro_choque& r
 			
 			vec3 normal_saliente = (registro.p - centro) / radio;
 			registro.set_cara_y_normal(r,normal_saliente);
+			registro.material_ptr = material_ptr;
 			return true;
 		}
 		temp = (-medio_b + raiz) / a;
@@ -69,6 +73,7 @@ bool esfera::choca(const rayo& r, double t_min, double t_max, registro_choque& r
 			registro.p = r.en(registro.t);
 			vec3 normal_saliente = (registro.p - centro) / radio;
 			registro.set_cara_y_normal(r,normal_saliente);
+			registro.material_ptr = material_ptr;
 			return true;
 		}
 	}

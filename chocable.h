@@ -1,11 +1,14 @@
 #ifndef CHOCABLE_H
 #define CHOCABLE_H
 
-#include "rayo.h"
+#include "rtweekend.h"
+
+class material; //no se para que se usa, pero supuestamente el puntero que se usa mas abajo apunta a una clase.
 
 struct registro_choque{
 	punto3 p;
 	vec3 normal;
+	shared_ptr<material> material_ptr;
 	double t;
 	bool cara_frontal;
 	
