@@ -143,5 +143,18 @@ vec3 reflejar(const vec3& v, const vec3& n){
 	return v - 2 * producto_punto(v,n) * n;
 }
 
+/*
+	R_saliente = Rparalelo + Rperpendicular 
+	R_paralelo = indice1_sobre_indice2 (R + (n . -R) n)
+	R_perpendicular = - sqrt(1 - |Rparalelo|^2 . n)
+*/
+
+vec3 refractar(const vec3& r, const vec3& n, double indice1_sobre_indice2){
+	auto cos_tita = producto_punto(-r,n);
+	vec3 r_saliente_paralelo = indice1_sobre_indice2 * (r + cos_tita * n);
+	vec3 r_saliente_perpendicular = -sqrt(1.0 - r_saliente_paralelo.longitud_cuadrada()) * n;
+	return r_saliente_paralelo + r_saliente_perpendicular;
+}
+
 #endif
 

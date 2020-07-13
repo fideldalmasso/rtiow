@@ -37,6 +37,26 @@ public:
 	double aspereza;
 };
 
+class dialectrico : public material{
+public:
+	dialectrico(double ir) : indice_de_refraccion(ir) {}
+	
+	virtual bool refleja(const rayo& rayo_incidente, const registro_choque& registro, color& atenuacion, rayo& rayo_reflejado) const{
+	atenuacion = color(1.0,1.0,1.0);
+	double indice1_sobre_indice2;
+	if(registro.cara_frontal)
+		indice1_sobre_indice2 = 1.0 / indice_de_refraccion;
+	else
+		indice1_sobre_indice2 = indice_de_refraccion;
+	
+	vec3 direccion_unitaria = vector_unitario(rayo_incidente.direccion());
+	vec3 direccion_refractada = refractar(direccion_unitaria, registro.normal, indice1_sobre_indice2);
+	rayo_reflejado = rayo(registro.p, direccion_refractada);
+	return true;
+	}
+public:
+	double indice_de_refraccion;
+};
 
 
 
