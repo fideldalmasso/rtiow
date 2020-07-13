@@ -62,11 +62,14 @@ int main() {
 	cout << "P3\n" << ancho << ' ' << alto << "\n255\n";
 
 	lista_chocable mundo;
-	mundo.agregar(make_shared<esfera>(punto3(0,-100.5,-1), 100, make_shared<lambertiano>(color(0.8,0.8,0.0))));
-	mundo.agregar(make_shared<esfera>(punto3(-1,0,-1), 0.5, make_shared<metalico>(color(0.8,0.8,0.8),0.1)));
-	mundo.agregar(make_shared<esfera>(punto3(0,0,-1), 0.5, make_shared<lambertiano>(color(0.7,0.3,0.3))));
-	mundo.agregar(make_shared<esfera>(punto3(1,0,-1), 0.5, make_shared<dialectrico>(1.5)));
-	//mundo.agregar(make_shared<esfera>(punto3(1,0,-1), 0.5, make_shared<metalico>(color(0.8,0.6,0.2),0.4)));
+	mundo.agregar(make_shared<esfera>(punto3(0,-100.5,-1), 100, make_shared<lambertiano>(color(0.5,0.2,0.2))));
+	
+	mundo.agregar(make_shared<esfera>(punto3(-1,0,-1), 0.5, make_shared<metalico>(color(0.8,0.8,0.8),0.0)));
+	mundo.agregar(make_shared<esfera>(punto3(-0.4,-0.3,-0.6), -0.15, make_shared<dialectrico>(1.5)));
+	mundo.agregar(make_shared<esfera>(punto3(0,0,-1), 0.5, make_shared<dialectrico>(2.1)));
+	mundo.agregar(make_shared<esfera>(punto3(0.4,-0.3,-0.6), 0.15, make_shared<metalico>(color(1.0,1.0,0.0),0.2)));
+	mundo.agregar(make_shared<esfera>(punto3(1,0,-1), 0.5, make_shared<lambertiano>(color(0.9,0.9,0.3))));
+	
 	
 	camara cam;
 	

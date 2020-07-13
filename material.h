@@ -1,6 +1,13 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 #include "rtweekend.h"
+
+double schlick(double coseno, double indice_de_refraccion){
+	auto r0 = (1 - indice_de_refraccion) / (1 + indice_de_refraccion);
+	r0 = r0 * r0;
+	return r0 + (1-r0)*pow((1 - coseno),5);
+}
+
 class material{
 public:
 	virtual bool refleja(const rayo& rayo_incidente, const registro_choque& registro, color& atenuacion, rayo& rayo_reflejado) const = 0;
@@ -43,13 +50,9 @@ public:
 	
 	virtual bool refleja(const rayo& rayo_incidente, const registro_choque& registro, color& atenuacion, rayo& rayo_reflejado) const{
 	
-	
 	atenuacion = color(1.0,1.0,1.0);
-	
 	double indice1_sobre_indice2 = (registro.cara_frontal) ? (1.0 / indice_de_refraccion) : (indice_de_refraccion);
-	
 	vec3 direccion_unitaria = vector_unitario(rayo_incidente.direccion());
-	
 	double cos_tita = fmin(producto_punto(-direccion_unitaria, registro.normal),1.0);
 	double sin_tita = sqrt(1.0 - cos_tita*cos_tita);
 	
@@ -60,10 +63,19 @@ public:
 		return true;	
 	}
 	else {
-		//refractar
+		double probabilidad_de_reflexion = schlick(cos_tita, indice1_sobre_indice2);
+		if(double_aleatorio() < probabilidad_de_reflexion){
+			//reflejar de todas formas
+			vec3 direccion_reflejada = reflejar(direccion_unitaria,registro.normal);
+			rayo_reflejado = rayo(registro.p, direccion_reflejada);
+			return true;
+		}
+		else{
+		   //refractar
 		vec3 direccion_refractada = refractar(direccion_unitaria, registro.normal, indice1_sobre_indice2);	
 		rayo_reflejado = rayo(registro.p, direccion_refractada);
 		return true;
+		}
 	}
 	}
 public:
