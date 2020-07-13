@@ -3,8 +3,9 @@
 #include "esfera.h"
 #include "color.h"
 #include "camara.h"
+#include "material.h"
 #include<iostream>
-
+#include <cstdio>
 using namespace std;
 
 
@@ -15,10 +16,13 @@ color color_de_rayo(const rayo& r, const chocable& mundo, int profundidad){
 		return color(0,0,0);
 	
 	if(mundo.choca(r,0.001,infinito, registro)){
-		//objetivo es un punto aleatorio dentro de una esfera unitaria que 
+		//objetivo es un punto aleatorio dentro de la superficie de una esfera unitaria que 
 		//es tangente a la otra esfera en el punto donde el rayo la toca
-		punto3 objetivo = registro.p + registro.normal + vector_unitario_aleatorio(); 
-		return 0.5 * color_de_rayo(rayo(registro.p, objetivo - registro.p), mundo, profundidad - 1); //hago rebotar el rayo
+		rayo rayo_reflejado;
+		color atenuacion;
+		if(registro.material_ptr->refleja(r,registro,atenuacion,rayo_reflejado))
+			return atenuacion * color_de_rayo(rayo_reflejado,mundo, profundidad - 1);
+		else return color(0,0,0);
 	}
 	
 	//sino, dibujo el fondo
@@ -39,6 +43,7 @@ color color_de_rayo(const rayo& r, const chocable& mundo, int profundidad){
 
 
 int main() {
+	freopen("../out.ppm", "w", stdout);
 	//(1) rda = ancho / alto ->
 	//(2) ancho = rda * alto
 	//(3) alto = ancho / rda
@@ -54,8 +59,8 @@ int main() {
 	cout << "P3\n" << ancho << ' ' << alto << "\n255\n";
 
 	lista_chocable mundo;
-	mundo.agregar(make_shared<esfera>(punto3(0,0,-1), 0.5));
-	mundo.agregar(make_shared<esfera>(punto3(0,-100.5,-1), 100));
+	mundo.agregar(make_shared<esfera>(punto3(0,0,-1), 0.5, make_shared<lambertiano>(color(0.7,0.3,0.3))));
+	mundo.agregar(make_shared<esfera>(punto3(0,-100.5,-1), 100, make_shared<lambertiano>(color(0.8,0.8,0.0))));
 	
 	camara cam;
 	
