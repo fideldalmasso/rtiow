@@ -113,13 +113,21 @@ inline vec3 vector_unitario(vec3 v) {
 	return v / v.longitud();
 }
 
-vec3 aleatorio_en_esfera_unitaria(){
+vec3 vector_en_esfera_unitaria_aleatorio(){
 	while(true){
 		auto p = vec3::aleatorio(-1,1);
 		if(p.longitud_cuadrada() >= 1)  continue;
 		return p;
 	}
 }
+	
+vec3 vector_unitario_aleatorio(){
+	auto angulo = double_aleatorio(0,2*pi);
+	auto z = double_aleatorio(-1,1);
+	auto r = sqrt(1 - z*z);
+	return vec3(r*cos(angulo),r*sin(angulo),z);
+}
+	
 
 #endif
 
