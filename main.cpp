@@ -61,6 +61,8 @@ int main() {
 	lista_chocable mundo;
 	mundo.agregar(make_shared<esfera>(punto3(0,0,-1), 0.5, make_shared<lambertiano>(color(0.7,0.3,0.3))));
 	mundo.agregar(make_shared<esfera>(punto3(0,-100.5,-1), 100, make_shared<lambertiano>(color(0.8,0.8,0.0))));
+	mundo.agregar(make_shared<esfera>(punto3(1,0,-1), 0.5, make_shared<metalico>(color(0.8,0.6,0.2))));
+	mundo.agregar(make_shared<esfera>(punto3(-1,0,-1), 0.5, make_shared<metalico>(color(0.8,0.8,0.8))));
 	
 	camara cam;
 	

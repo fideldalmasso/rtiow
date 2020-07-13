@@ -138,7 +138,10 @@ vec3 vector_en_semiesfera_unitaria_aleatorio(const vec3& normal){
 	else
 		return -vector_en_esfera;
 }
-	
+
+vec3 reflejar(const vec3& v, const vec3& n){
+	return v - 2 * producto_punto(v,n) * n;
+}
 
 #endif
 
