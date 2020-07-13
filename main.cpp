@@ -21,6 +21,9 @@ color color_de_rayo(const rayo& r, const chocable& mundo, int profundidad){
 		rayo rayo_reflejado;
 		color atenuacion;
 		if(registro.material_ptr->refleja(r,registro,atenuacion,rayo_reflejado))
+			//para mezclar los colores, los multiplico componente a componente
+			//esto funciona porque las componentes siempre varían entre 0 y 1
+			//entonces multiplicar dos colores siempre da como resultado otro color válido
 			return atenuacion * color_de_rayo(rayo_reflejado,mundo, profundidad - 1);
 		else return color(0,0,0);
 	}

@@ -42,17 +42,29 @@ public:
 	dialectrico(double ir) : indice_de_refraccion(ir) {}
 	
 	virtual bool refleja(const rayo& rayo_incidente, const registro_choque& registro, color& atenuacion, rayo& rayo_reflejado) const{
+	
+	
 	atenuacion = color(1.0,1.0,1.0);
-	double indice1_sobre_indice2;
-	if(registro.cara_frontal)
-		indice1_sobre_indice2 = 1.0 / indice_de_refraccion;
-	else
-		indice1_sobre_indice2 = indice_de_refraccion;
+	
+	double indice1_sobre_indice2 = (registro.cara_frontal) ? (1.0 / indice_de_refraccion) : (indice_de_refraccion);
 	
 	vec3 direccion_unitaria = vector_unitario(rayo_incidente.direccion());
-	vec3 direccion_refractada = refractar(direccion_unitaria, registro.normal, indice1_sobre_indice2);
-	rayo_reflejado = rayo(registro.p, direccion_refractada);
-	return true;
+	
+	double cos_tita = fmin(producto_punto(-direccion_unitaria, registro.normal),1.0);
+	double sin_tita = sqrt(1.0 - cos_tita*cos_tita);
+	
+	if(indice1_sobre_indice2 * sin_tita > 1.0){ 
+		//hacemos una reflexion interna total, porque la ley de Snell no funciona en este caso
+		vec3 direccion_reflejada = reflejar(direccion_unitaria,registro.normal);
+		rayo_reflejado = rayo(registro.p, direccion_reflejada);
+		return true;	
+	}
+	else {
+		//refractar
+		vec3 direccion_refractada = refractar(direccion_unitaria, registro.normal, indice1_sobre_indice2);	
+		rayo_reflejado = rayo(registro.p, direccion_refractada);
+		return true;
+	}
 	}
 public:
 	double indice_de_refraccion;
