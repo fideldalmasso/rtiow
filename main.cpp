@@ -6,6 +6,7 @@
 #include "material.h"
 #include<iostream>
 #include <cstdio>
+#include <ctime>
 using namespace std;
 
 
@@ -71,9 +72,10 @@ int main() {
 	mundo.agregar(make_shared<esfera>(punto3(1,0,-1), 0.5, make_shared<lambertiano>(color(0.9,0.9,0.3))));
 	
 	
-	camara cam;
+	camara cam(110,double(ancho)/alto);
 	
-	
+	time_t inicio,fin;
+	time(&inicio);
 	for (int j = alto -1; j >= 0; --j) {
 		cerr << "\rScanlines remaining: " << j << ' ' << flush;
 		for (int i = 0; i < ancho; ++i) {
@@ -93,5 +95,8 @@ int main() {
 			escribir_color(cout,pixel_color, muestras_por_pixel);
 		}
 	}
+	time(&fin);
+	double tiempo_transcurrido = (double) fin - inicio;
+	fprintf(stderr,"\nTiempo transcurrido: %.1f",tiempo_transcurrido);
 	cerr << "\nDone.\n";
 }

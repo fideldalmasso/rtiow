@@ -18,7 +18,7 @@ current_source=main.cpp
 path_char=/
 [source]
 path=main.cpp
-cursor=55:20
+cursor=90:3
 open=true
 [header]
 path=vec3.h
@@ -43,7 +43,8 @@ path=rtweekend.h
 cursor=20:0
 [header]
 path=camara.h
-cursor=3:0
+cursor=25:2
+open=true
 [header]
 path=material.h
 cursor=52:33
