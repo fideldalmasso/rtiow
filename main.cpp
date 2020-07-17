@@ -58,7 +58,7 @@ int main() {
 	//uso (2)
 	const int alto= static_cast<int>(ancho / relacion_de_aspecto);
 	const int muestras_por_pixel  = 100;
-	const int profundidad_maxima = 50;
+	const int profundidad_maxima = 80;
 	
 	cout << "P3\n" << ancho << ' ' << alto << "\n255\n";
 
@@ -67,12 +67,14 @@ int main() {
 	
 	mundo.agregar(make_shared<esfera>(punto3(-1,0,-1), 0.5, make_shared<metalico>(color(0.8,0.8,0.8),0.0)));
 	mundo.agregar(make_shared<esfera>(punto3(-0.4,-0.3,-0.6), -0.15, make_shared<dialectrico>(1.5)));
-	mundo.agregar(make_shared<esfera>(punto3(0,0,-1), 0.5, make_shared<dialectrico>(2.1)));
+	 mundo.agregar(make_shared<esfera>(punto3(0,0,-1), 0.5, make_shared<dialectrico>(2.1)));
 	mundo.agregar(make_shared<esfera>(punto3(0.4,-0.3,-0.6), 0.15, make_shared<metalico>(color(1.0,1.0,0.0),0.2)));
 	mundo.agregar(make_shared<esfera>(punto3(1,0,-1), 0.5, make_shared<lambertiano>(color(0.9,0.9,0.3))));
 	
-	
-	camara cam(110,double(ancho)/alto);
+	punto3 mirar_desde(-2,2,1);
+	punto3 mirar_hacia(0,0,-1);
+	vec3 vup(0,1,0);
+	camara cam(mirar_desde,mirar_hacia,vup,60,relacion_de_aspecto);
 	
 	time_t inicio,fin;
 	time(&inicio);
