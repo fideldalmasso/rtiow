@@ -47,5 +47,7 @@ bool lista_chocable::choca(const rayo& r, double t_min, double t_max, registro_c
 
 
 
+
+
 #endif
 
