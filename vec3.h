@@ -155,6 +155,14 @@ vec3 refractar(const vec3& r, const vec3& n, double indice1_sobre_indice2){
 	vec3 r_saliente_perpendicular = -sqrt(1.0 - r_saliente_paralelo.longitud_cuadrada()) * n;
 	return r_saliente_paralelo + r_saliente_perpendicular;
 }
+	
+vec3 vector_en_disco_unitario_aleatorio(){
+	while(true){
+		auto p = vec3(double_aleatorio(-1,1), double_aleatorio(-1,1),0);
+		if(p.longitud_cuadrada() >=1) continue; //no me sirve, el vector esta fuera del disco
+		else return p;
+	}
+}
 
 #endif
 

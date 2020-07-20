@@ -35,7 +35,7 @@ public:
 		vec3 direccion_reflejada = reflejar(vector_unitario(rayo_incidente.direccion()), registro.normal);
 		rayo_reflejado = rayo(registro.p, direccion_reflejada + aspereza * vector_en_esfera_unitaria_aleatorio());
 		atenuacion = albedo;
-		//solo reflejar cuando el rayo saliente está del mismo lado que el que ingresa
+		//solo reflejar cuando el rayo saliente estï¿½ del mismo lado que el que ingresa
 		return (producto_punto(rayo_reflejado.direccion(), registro.normal) > 0); 
 	}
 	

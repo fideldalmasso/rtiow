@@ -34,6 +34,7 @@ inline double double_aleatorio(double min, double max){
 //dejar estos include aca!!! sino se rompe todo mal
 #include "vec3.h"
 #include "rayo.h"
+#include "chocable.h"
 	
 
 #endif

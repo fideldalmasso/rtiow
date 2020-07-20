@@ -9,6 +9,53 @@
 #include <ctime>
 using namespace std;
 
+lista_chocable escena_aleatoria(){
+	lista_chocable mundo;
+	auto material_suelo = make_shared<lambertiano>(color(0.5,0.5,0.5));
+	mundo.agregar(make_shared<esfera>(punto3(0,-1000,0),1000,material_suelo));
+
+	for(int x = -11; x<11; x++){
+		for(int z = -11; z<11; z++){
+			auto elegir_material = double_aleatorio();
+			auto radio  = double_aleatorio(0.1,0.4);
+			punto3 centro(x + 0.9 * double_aleatorio(),radio, z + 0.9*double_aleatorio());
+
+			shared_ptr<material> material_esfera;
+
+			if(elegir_material < 0.8){
+				//difuso
+				auto albedo = color::aleatorio() * color::aleatorio();
+				material_esfera = make_shared<lambertiano>(albedo);
+				
+			}
+			else if(elegir_material < 0.95){
+				//metal
+				auto albedo = color::aleatorio(0.5,1);
+				auto aspereza = double_aleatorio(0,0.5);
+				material_esfera = make_shared<metalico>(albedo,aspereza);
+			}
+			else{
+				//vidrio
+				material_esfera = make_shared<dialectrico>(1.5);
+			
+			}
+
+			mundo.agregar(make_shared<esfera>(centro,radio,material_esfera));
+
+		}
+	}
+	auto material1 = make_shared<dialectrico>(1.5);
+	auto material2 = make_shared<lambertiano>(color(0.4,0.2,0.1));
+	auto material3 = make_shared<metalico>(color(0.7,0.6,0.5),0.0);
+
+	mundo.agregar(make_shared<esfera>(punto3(0,1,0),1.0,material1));
+	mundo.agregar(make_shared<esfera>(punto3(-4,1,0),1.0,material2));
+	mundo.agregar(make_shared<esfera>(punto3(4,1,0),1.0,material3));
+
+
+	return mundo;
+
+}
 
 color color_de_rayo(const rayo& r, const chocable& mundo, int profundidad){ 
 	registro_choque registro;
@@ -23,8 +70,8 @@ color color_de_rayo(const rayo& r, const chocable& mundo, int profundidad){
 		color atenuacion;
 		if(registro.material_ptr->refleja(r,registro,atenuacion,rayo_reflejado))
 			//para mezclar los colores, los multiplico componente a componente
-			//esto funciona porque las componentes siempre varían entre 0 y 1
-			//entonces multiplicar dos colores siempre da como resultado otro color válido
+			//esto funciona porque las componentes siempre varï¿½an entre 0 y 1
+			//entonces multiplicar dos colores siempre da como resultado otro color vï¿½lido
 			return atenuacion * color_de_rayo(rayo_reflejado,mundo, profundidad - 1);
 		else return color(0,0,0);
 	}
@@ -54,27 +101,30 @@ int main() {
 	
 	//uso(1)
 	const auto relacion_de_aspecto = 16.0 / 9.0;
-	const int ancho = 800;
+	const int ancho = 200;
 	//uso (2)
 	const int alto= static_cast<int>(ancho / relacion_de_aspecto);
 	const int muestras_por_pixel  = 100;
-	const int profundidad_maxima = 80;
+	const int profundidad_maxima = 100;
 	
 	cout << "P3\n" << ancho << ' ' << alto << "\n255\n";
 
-	lista_chocable mundo;
-	mundo.agregar(make_shared<esfera>(punto3(0,-100.5,-1), 100, make_shared<lambertiano>(color(0.5,0.2,0.2))));
+	lista_chocable mundo = escena_aleatoria();
+	// mundo.agregar(make_shared<esfera>(punto3(0,-100.5,-1), 100, make_shared<lambertiano>(color(0.5,0.2,0.2))));
 	
-	mundo.agregar(make_shared<esfera>(punto3(-1,0,-1), 0.5, make_shared<metalico>(color(0.8,0.8,0.8),0.0)));
-	mundo.agregar(make_shared<esfera>(punto3(-0.4,-0.3,-0.6), -0.15, make_shared<dialectrico>(1.5)));
-	 mundo.agregar(make_shared<esfera>(punto3(0,0,-1), 0.5, make_shared<dialectrico>(2.1)));
-	mundo.agregar(make_shared<esfera>(punto3(0.4,-0.3,-0.6), 0.15, make_shared<metalico>(color(1.0,1.0,0.0),0.2)));
-	mundo.agregar(make_shared<esfera>(punto3(1,0,-1), 0.5, make_shared<lambertiano>(color(0.9,0.9,0.3))));
+	// mundo.agregar(make_shared<esfera>(punto3(-1,0,-1), 0.5, make_shared<metalico>(color(0.8,0.8,0.8),0.0)));
+	// mundo.agregar(make_shared<esfera>(punto3(-0.4,-0.3,-0.6), -0.15, make_shared<dialectrico>(1.5)));
+	//  mundo.agregar(make_shared<esfera>(punto3(0,0,-1), 0.5, make_shared<dialectrico>(2.1)));
+	// mundo.agregar(make_shared<esfera>(punto3(0.4,-0.3,-0.6), 0.15, make_shared<metalico>(color(1.0,1.0,0.0),0.2)));
+	// mundo.agregar(make_shared<esfera>(punto3(1,0,-1), 0.5, make_shared<lambertiano>(color(0.9,0.9,0.3))));
 	
-	punto3 mirar_desde(-2,2,1);
-	punto3 mirar_hacia(0,0,-1);
+	punto3 mirar_desde(13,2,3);
+	punto3 mirar_hacia(0,0,0);
 	vec3 vup(0,1,0);
-	camara cam(mirar_desde,mirar_hacia,vup,60,relacion_de_aspecto);
+	auto distancia_focal = 10; //(mirar_desde - mirar_hacia).longitud();
+	auto apertura = 0.1;
+	
+	camara cam(mirar_desde,mirar_hacia,vup,20,relacion_de_aspecto,apertura,distancia_focal);
 	
 	time_t inicio,fin;
 	time(&inicio);
