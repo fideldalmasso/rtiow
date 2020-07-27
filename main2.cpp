@@ -13,7 +13,7 @@
 using namespace std;
 
 
-lista_chocable escena_aleatoria(){
+lista_chocable escena_aleatoria1(){
 	lista_chocable mundo;
 	auto material_suelo = make_shared<lambertiano>(color(0.5,0.5,0.5));
 	mundo.agregar(make_shared<esfera>(punto3(0,-1000,0),1000,material_suelo));
@@ -61,44 +61,123 @@ lista_chocable escena_aleatoria(){
 	
 }
 
+lista_chocable escena_aleatoria2(){
+	lista_chocable mundo;
+	auto material_suelo = make_shared<lambertiano>(color(0.7,0.7,0.7));
+	mundo.agregar(make_shared<esfera>(punto3(0,-1000,0),1000,material_suelo));
+	
+	auto material1 = make_shared<dialectrico>(1.4);
+	punto3 centro_grande(0,1.5,0);
+	mundo.agregar(make_shared<esfera>(centro_grande,1.5,material1));
+	color azul;
+		for(int i =0; i<50; i++){
+			auto elegir_material = double_aleatorio();
+			auto radio  = double_aleatorio(0.05,0.2);
+			punto3 centro(vector_en_esfera_unitaria_aleatorio()*1.3+centro_grande);
+			azul = color(double_aleatorio(0.0,0.2),double_aleatorio(0.0,0.2),double_aleatorio(0.5,0.95));
+			shared_ptr<material> material_esfera;
+
+				if(elegir_material < 0.4){
+					//difuso
+					auto albedo = azul;
+					material_esfera = make_shared<lambertiano>(albedo);
+					
+				}
+				else if(elegir_material < 0.7){
+					//metal
+					auto albedo = azul;
+					auto aspereza = double_aleatorio(0,0.5);
+					material_esfera = make_shared<metalico>(albedo,aspereza);
+				}
+				else{
+					//vidrio
+					material_esfera = make_shared<dialectrico>(1.5);
+					
+				}
+				
+				mundo.agregar(make_shared<esfera>(centro,radio,material_esfera));
+			
+		}
+
+		color rojo;
+		for(int x = -10; x<10; x++){
+			for(int z = -10; z<10; z++){
+				
+				rojo = color(double_aleatorio(0.5,0.95),double_aleatorio(0.0,0.2),double_aleatorio(0.0,0.2));
+				auto elegir_material = double_aleatorio();
+				auto radio  = double_aleatorio(0.1,0.4);
+				punto3 centro(x + 0.9 * double_aleatorio(),radio, z + 0.9*double_aleatorio());
+				
+				shared_ptr<material> material_esfera;
+				
+				if(elegir_material < 0.8){
+					//difuso
+					auto albedo = rojo;
+					material_esfera = make_shared<lambertiano>(albedo);
+					
+				}
+				else if(elegir_material < 0.95){
+					//metal
+					auto albedo = rojo;
+					auto aspereza = double_aleatorio(0,0.2);
+					material_esfera = make_shared<metalico>(albedo,aspereza);
+				}
+				else{
+					//vidrio
+					material_esfera = make_shared<dialectrico>(1.5);
+					
+				}
+				
+				mundo.agregar(make_shared<esfera>(centro,radio,material_esfera));
+				
+			}
+		}
+		
+		
+	
+	
+	
+		
+		return mundo;
+	
+}
+	
 
 int main(){
 	
 	const auto relacion_de_aspecto = 16.0/9.0;
-	const int ancho = 300;
+	const int ancho = 1920;
 	const int alto= static_cast<int>(ancho / relacion_de_aspecto);
-	const int muestras_por_pixel  = 500;
-	const int profundidad_maxima = 50;
+	const int muestras_por_pixel  = 5;
+	const int profundidad_maxima = 10;
 
-	lista_chocable mundo = escena_aleatoria();
+	lista_chocable mundo = escena_aleatoria2();
     int cantidad_hilos = thread::hardware_concurrency();
     cout<< "Hilos detectados: " << cantidad_hilos << "\n";
 	
-	punto3 mirar_desde(13,2,3);
-	punto3 mirar_hacia(0,0,0);
+	punto3 mirar_desde(0,3,10);
+	punto3 mirar_hacia(0,1.5,0);
 	vec3 vup(0,1,0);
-	auto distancia_focal = 10; //(mirar_desde - mirar_hacia).longitud();
+	auto distancia_focal = (mirar_desde - mirar_hacia).longitud(); //10;
 	auto apertura = 0.1;
 	
-	camara cam(mirar_desde,mirar_hacia,vup,20,relacion_de_aspecto,apertura,distancia_focal);
+	camara cam(mirar_desde,mirar_hacia,vup,30,relacion_de_aspecto,apertura,distancia_focal);
 	
 	time_t inicio,fin;
 	time(&inicio);
-	escena e(ancho,alto,muestras_por_pixel,profundidad_maxima,mundo,cam,8,cantidad_hilos);
+	escena e(ancho,alto,muestras_por_pixel,profundidad_maxima,mundo,cam,128,cantidad_hilos);
 
 	e.ejecutar();
 	ofstream archivo;
 	archivo.open("../out.ppm");
-	//freopen("../out.ppm", "w", stdout);
 	archivo << "P3\n" << ancho << ' ' << alto << "\n255\n";
 	
-	int total = alto * ancho * 3;
-	for(int i = 0; i<total; i+=3){
+	int total = alto * ancho ;
+	for(int i = 0; i<total; i++){
 		
-		//cout << e.pantalla.datos[i] << " " << e.pantalla.datos[i+1] << " " << e.pantalla.datos[i+2] << "\n";
-		double r = e.pantalla.datos[i];
-		double g = e.pantalla.datos[i+1];
-		double b = e.pantalla.datos[i+2];
+		double r = e.datos[i].x();
+		double g = e.datos[i].y();
+		double b = e.datos[i].z();
 		escribir_color(archivo,
 					   color(r,g,b),
 					   muestras_por_pixel);

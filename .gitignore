@@ -1,3 +1,6 @@
 **/Debug
 out*.ppm
 *.exe
+*.o
+**/Release
+.vscode

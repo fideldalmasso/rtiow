@@ -50,33 +50,26 @@ color color_de_rayo(const rayo& r, const chocable& mundo, int profundidad){
 
 class escena{
 public:
-	int cacona(){ return 10;}
-	//escena() {}
 	
-	escena(int ancho1, int alto1, int muestras, int prof, const lista_chocable &mundo1, camara cam1, int n, int canthilos){
+	escena(int ancho1, int alto1, int muestras, int prof, const lista_chocable &mundo1, const camara& cam1, int tamTarea, int canthilos){
 		ancho= ancho1;
 		alto= alto1;
 		muestras_por_pixel= muestras;
 		profundidad_maxima= prof;
 		mundo= mundo1;
 		cam= cam1;
-		N= n;
+		N= tamTarea;
 		cantidad_hilos = canthilos;
-		
-		pantalla = pixels(ancho,alto);
+		datos = new color[ancho*alto];
 		total_pixeles = ancho * alto;
 		total_tareas = total_pixeles%N==0?total_pixeles/N:total_pixeles/N+1;
 		hilos = vector<thread>(cantidad_hilos);
-		completadas = vector<bool>(total_tareas,false);
 		tarea_siguiente=0;
 		}
 	
 	void imprimir(){
-		//for(bool c : completadas)
-		//	cout << c;
 		int progreso = tarea_siguiente * 100 / total_tareas ;
-		printf("\rProgreso: %.3i%%",progreso);
-		//cout <<'\n';
+		printf("\rProgreso: %i%%",progreso);
 	}
 		
 	void ejecutar(){
@@ -88,15 +81,13 @@ public:
 	
 	inline int buscar_tarea(){
 		unique_lock<mutex> guard(candado);
-		
-		while(completadas[tarea_siguiente]){
-			if(tarea_siguiente == total_tareas-1)
+		int x = -1;
+			if(tarea_siguiente == total_tareas)
 				return -1;
-			else 
+			else {
+		x = tarea_siguiente;
 				tarea_siguiente++;
-		}
-		completadas[tarea_siguiente] = true;
-		int x = tarea_siguiente;
+			}
 		guard.unlock();
 		return x;
 	}
@@ -111,17 +102,14 @@ public:
 			else{
 				
 				
-				//int inicio = total_pixeles -1 - t * N;
-				//int fin = inicio - N;
 				int inicio = t * N;
 				int fin = inicio + N;
 				if(t>=total_tareas-1)
-					fin = total_pixeles - 1;
+					fin = total_pixeles;
 				
 				int j,i;
 				
 				for(;inicio<fin;inicio++){
-					//j = (total_pixeles -1 - inicio) / ancho - 1;
 					j = alto -1 -  (inicio / ancho);
 					i = inicio % ancho;
 					
@@ -133,12 +121,9 @@ public:
 						rayo r = cam.get_rayo(u,v);
 						pixel_color += color_de_rayo(r,mundo, profundidad_maxima);
 					}
-					//escribir_color(cout,pixel_color, muestras_por_pixel);
-					
-					pantalla.acumular(inicio,pixel_color);
+					datos[inicio] = pixel_color;
 					
 				}
-				//cout << "Tarea " << t << " finalizada\n";
 				imprimir();
 
 			}
@@ -153,13 +138,14 @@ public:
 
 	
 public:
+	color *  datos;
 	pixels pantalla;
 			 
 private:
 	int N, ancho, alto, muestras_por_pixel, profundidad_maxima, total_pixeles, total_tareas, cantidad_hilos;
 	lista_chocable mundo;
 	camara cam;
-	vector<bool> completadas;
+	//vector<bool> completadas;
 	vector<thread> hilos;
 	mutex candado;
 	int tarea_siguiente;
