@@ -5,7 +5,6 @@
 
 class camara {
 public:
-	camara(){}
 	camara(punto3 mirar_desde, 
 		   punto3 mirar_hacia, 
 		   vec3 v_arriba, 
