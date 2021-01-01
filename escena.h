@@ -1,7 +1,7 @@
 #ifndef ESCENA_H
 #define ESCENA_H
 
-#include "pixels.h"
+//#include "pixels.h"
 #include "rtweekend.h"
 #include "lista_chocable.h"
 #include "esfera.h"
@@ -124,7 +124,9 @@ public:
 					datos[inicio] = pixel_color;
 					
 				}
+				unique_lock<mutex> guard2(candado2);
 				imprimir();
+				guard2.unlock();
 
 			}
 		 }
@@ -139,7 +141,7 @@ public:
 	
 public:
 	color *  datos;
-	pixels pantalla;
+	//pixels pantalla;
 			 
 private:
 	int N, ancho, alto, muestras_por_pixel, profundidad_maxima, total_pixeles, total_tareas, cantidad_hilos;
@@ -148,6 +150,7 @@ private:
 	//vector<bool> completadas;
 	vector<thread> hilos;
 	mutex candado;
+	mutex candado2;
 	int tarea_siguiente;
 	
 };
