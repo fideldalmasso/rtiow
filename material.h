@@ -19,7 +19,7 @@ public:
 	
 	virtual bool refleja(const rayo& rayo_incidente, const registro_choque& registro, color& atenuacion, rayo& rayo_reflejado) const{
 		vec3 direccion_reflejada  = registro.normal + vector_unitario_aleatorio();
-		rayo_reflejado = rayo(registro.p, direccion_reflejada);
+		rayo_reflejado = rayo(registro.p, direccion_reflejada, rayo_incidente.tiempo());
 		atenuacion = albedo;
 		return true;
 	}
@@ -33,7 +33,7 @@ public:
 	metalico(const color& a, double f) : albedo(a), aspereza(f < 1 ? f : 1) {}
 	virtual bool refleja(const rayo& rayo_incidente, const registro_choque& registro, color& atenuacion, rayo& rayo_reflejado) const{
 		vec3 direccion_reflejada = reflejar(vector_unitario(rayo_incidente.direccion()), registro.normal);
-		rayo_reflejado = rayo(registro.p, direccion_reflejada + aspereza * vector_en_esfera_unitaria_aleatorio());
+		rayo_reflejado = rayo(registro.p, direccion_reflejada + aspereza * vector_en_esfera_unitaria_aleatorio(), rayo_incidente.tiempo());
 		atenuacion = albedo;
 		//solo reflejar cuando el rayo saliente est� del mismo lado que el que ingresa
 		return (producto_punto(rayo_reflejado.direccion(), registro.normal) > 0); 
@@ -59,7 +59,7 @@ public:
 	if(indice1_sobre_indice2 * sin_tita > 1.0){ 
 		//hacemos una reflexion interna total, porque la ley de Snell no funciona en este caso
 		vec3 direccion_reflejada = reflejar(direccion_unitaria,registro.normal);
-		rayo_reflejado = rayo(registro.p, direccion_reflejada);
+		rayo_reflejado = rayo(registro.p, direccion_reflejada, rayo_incidente.tiempo());
 		return true;	
 	}
 	else {
@@ -67,13 +67,13 @@ public:
 		if(double_aleatorio() < probabilidad_de_reflexion){
 			//reflejar de todas formas
 			vec3 direccion_reflejada = reflejar(direccion_unitaria,registro.normal);
-			rayo_reflejado = rayo(registro.p, direccion_reflejada);
+			rayo_reflejado = rayo(registro.p, direccion_reflejada, rayo_incidente.tiempo());
 			return true;
 		}
 		else{
 		   //refractar
 		vec3 direccion_refractada = refractar(direccion_unitaria, registro.normal, indice1_sobre_indice2);	
-		rayo_reflejado = rayo(registro.p, direccion_refractada);
+		rayo_reflejado = rayo(registro.p, direccion_refractada, rayo_incidente.tiempo());
 		return true;
 		}
 	}

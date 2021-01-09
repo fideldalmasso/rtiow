@@ -11,7 +11,9 @@ public:
 		   double fov_vertical, 
 		   double relacion_de_aspecto,
 		   double apertura,
-		   double distancia_focal) {
+		   double distancia_focal,
+		   double _tiempo0 = 0,
+		   double _tiempo1 = 0) {
 		//(1) rda = ancho / alto ->
 		//(2) ancho = rda * alto
 		//(3) alto = ancho / rda
@@ -32,12 +34,16 @@ public:
 		vertical = distancia_focal * alto_viewport * v;	//valores de y. Es el alto del viewport
 		esquina_inferior_izquierda = origen - horizontal/2 - vertical/2 - (distancia_focal * w);
 		radio_lente = apertura/2;
+		tiempo0=_tiempo0;
+		tiempo1=_tiempo1;
 	}
 	rayo get_rayo(double s, double t) const{
 		vec3 punto_aleatorio = radio_lente * vector_en_disco_unitario_aleatorio();
 		vec3 margen = u * punto_aleatorio.x() + v * punto_aleatorio.y();
 		
-		return rayo(origen + margen, esquina_inferior_izquierda + s * horizontal + t * vertical - origen - margen);
+		return rayo(origen + margen, 
+					esquina_inferior_izquierda + s * horizontal + t * vertical - origen - margen, 
+					double_aleatorio(tiempo0,tiempo1));
 	}
 	
 private:
@@ -47,6 +53,7 @@ private:
 		vec3 vertical;
 		vec3 u,v,w;
 		double radio_lente;
+		double tiempo0, tiempo1;
 };
 
 

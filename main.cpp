@@ -7,6 +7,7 @@
 #include<iostream>
 #include <cstdio>
 #include <ctime>
+#include "esfera_en_movimiento.h"
 using namespace std;
 
 lista_chocable escena_aleatoria(){
@@ -26,21 +27,23 @@ lista_chocable escena_aleatoria(){
 				//difuso
 				auto albedo = color::aleatorio() * color::aleatorio();
 				material_esfera = make_shared<lambertiano>(albedo);
-				
+				auto centro2 = centro + vec3(0,double_aleatorio(0,0.5),0);
+				mundo.agregar(make_shared<esfera_en_movimiento>(centro,centro2,0.0,1.0,0.2,material_esfera));
 			}
 			else if(elegir_material < 0.95){
 				//metal
 				auto albedo = color::aleatorio(0.5,1);
 				auto aspereza = double_aleatorio(0,0.5);
 				material_esfera = make_shared<metalico>(albedo,aspereza);
+				mundo.agregar(make_shared<esfera>(centro,radio,material_esfera));
 			}
 			else{
 				//vidrio
 				material_esfera = make_shared<dialectrico>(1.5);
+				mundo.agregar(make_shared<esfera>(centro,radio,material_esfera));
 			
 			}
 
-			mundo.agregar(make_shared<esfera>(centro,radio,material_esfera));
 
 		}
 	}
@@ -101,11 +104,11 @@ int main() {
 	
 	//uso(1)
 	const auto relacion_de_aspecto = 16.0 / 9.0;
-	const int ancho = 200;
+	const int ancho = 600;
 	//uso (2)
 	const int alto= static_cast<int>(ancho / relacion_de_aspecto);
-	const int muestras_por_pixel  = 100;
-	const int profundidad_maxima = 100;
+	const int muestras_por_pixel  = 50;
+	const int profundidad_maxima = 30;
 	
 	cout << "P3\n" << ancho << ' ' << alto << "\n255\n";
 
@@ -124,7 +127,7 @@ int main() {
 	auto distancia_focal = 10; //(mirar_desde - mirar_hacia).longitud();
 	auto apertura = 0.1;
 	
-	camara cam(mirar_desde,mirar_hacia,vup,20,relacion_de_aspecto,apertura,distancia_focal);
+	camara cam(mirar_desde,mirar_hacia,vup,20,relacion_de_aspecto,apertura,distancia_focal,0.0,1.0);
 	
 	time_t inicio,fin;
 	time(&inicio);
