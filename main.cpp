@@ -8,12 +8,13 @@
 #include <cstdio>
 #include <ctime>
 #include "esfera_en_movimiento.h"
+#include "bvh.h"
 using namespace std;
 
 lista_chocable escena_aleatoria(){
 	lista_chocable mundo;
 	auto material_suelo = make_shared<lambertiano>(color(0.5,0.5,0.5));
-	mundo.agregar(make_shared<esfera>(punto3(0,-1000,0),1000,material_suelo));
+	
 
 	for(int x = -11; x<11; x++){
 		for(int z = -11; z<11; z++){
@@ -54,9 +55,15 @@ lista_chocable escena_aleatoria(){
 	mundo.agregar(make_shared<esfera>(punto3(0,1,0),1.0,material1));
 	mundo.agregar(make_shared<esfera>(punto3(-4,1,0),1.0,material2));
 	mundo.agregar(make_shared<esfera>(punto3(4,1,0),1.0,material3));
+	mundo.agregar(make_shared<esfera>(punto3(0,-1000,0),1000,material_suelo));
+	
+	// return mundo;
 
+	lista_chocable objetos;
+	objetos.agregar(make_shared<nodo_bvh>(mundo,0,0));
+	return objetos;
 
-	return mundo;
+	
 
 }
 
@@ -104,11 +111,11 @@ int main() {
 	
 	//uso(1)
 	const auto relacion_de_aspecto = 16.0 / 9.0;
-	const int ancho = 600;
+	const int ancho = 500;
 	//uso (2)
 	const int alto= static_cast<int>(ancho / relacion_de_aspecto);
-	const int muestras_por_pixel  = 50;
-	const int profundidad_maxima = 30;
+	const int muestras_por_pixel  = 3;
+	const int profundidad_maxima = 3;
 	
 	cout << "P3\n" << ancho << ' ' << alto << "\n255\n";
 

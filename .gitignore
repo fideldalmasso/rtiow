@@ -1,6 +1,7 @@
 **/Debug
+**/Release
+**/Debug2
 out*.ppm
 *.exe
 *.o
-.vscode
 *.bin

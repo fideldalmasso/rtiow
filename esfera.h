@@ -9,6 +9,7 @@ public:
 	esfera(punto3 cen, double r, shared_ptr<material> m) : centro(cen), radio(r), material_ptr(m) {};
 	
 	virtual bool choca(const rayo& r, double t_min, double t_max, registro_choque& rec) const;
+	virtual bool caja_delimitadora(double tiempo0, double tiempo1, aabb& caja_saliente) const override;
 	
 public:
 	punto3 centro;
@@ -81,7 +82,10 @@ bool esfera::choca(const rayo& r, double t_min, double t_max, registro_choque& r
 	
 }
 
-
+bool esfera::caja_delimitadora(double tiempo0, double tiempo1, aabb& caja_saliente) const{
+	caja_saliente = aabb( centro- vec3(radio,radio,radio), centro + vec3(radio,radio,radio));
+	return true;
+}
 
 
 #endif

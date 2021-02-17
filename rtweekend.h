@@ -31,6 +31,12 @@ inline double double_aleatorio(){
 inline double double_aleatorio(double min, double max){
 	return min + (max - min) * double_aleatorio();
 }	
+	
+inline int int_aleatorio(int min, int max){
+	return static_cast<int>(double_aleatorio(min,max+1));
+}
+	
+	
 //dejar estos include aca!!! sino se rompe todo mal
 #include "vec3.h"
 #include "rayo.h"

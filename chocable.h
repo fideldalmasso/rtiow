@@ -2,6 +2,7 @@
 #define CHOCABLE_H
 
 #include "rtweekend.h"
+#include "aabb.h"
 
 class material; //no se para que se usa, pero supuestamente el puntero que se usa mas abajo apunta a una clase.
 
@@ -26,6 +27,7 @@ struct registro_choque{
 class chocable {
 public:
 	virtual bool choca(const rayo& r, double t_min, double t_max, registro_choque& rec) const = 0;
+	virtual bool caja_delimitadora(double tiempo0, double tiempo1, aabb& caja_saliente) const = 0;
 };
 
 #endif
