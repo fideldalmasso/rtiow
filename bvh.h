@@ -99,7 +99,7 @@ nodo_bvh::nodo_bvh(const std::vector<shared_ptr<chocable>>& objetos_src,
 	if(!izquierda->caja_delimitadora(tiempo0,tiempo1,caja_izquierda) || !derecha->caja_delimitadora(tiempo0,tiempo1,caja_derecha))
 		std::cerr << "No hay caja delimitadora en el constructor de nodo_bvh\n";
 	
-	caja = aabb::caja_englobadora(caja_izquierda,caja_derecha);
+	caja = caja_agrupadora(caja_izquierda,caja_derecha);
 }
 
 

@@ -11,6 +11,19 @@
 #include "bvh.h"
 using namespace std;
 
+lista_chocable escena_aleatoria2(){
+	lista_chocable mundo;
+	auto material2 = make_shared<lambertiano>(color(0.4,0.3,0.1));
+	mundo.agregar(make_shared<esfera>(punto3(-4,1,0),1.0,material2));
+	mundo.agregar(make_shared<esfera>(punto3(4,1,0),1.0,material2));
+	// mundo.agregar(make_shared<esfera>(punto3(0,1,0),1.0,material2));
+	// return mundo;
+	lista_chocable objetos;
+	objetos.agregar(make_shared<nodo_bvh>(mundo,0,0));
+	return objetos;
+
+}
+
 lista_chocable escena_aleatoria(){
 	lista_chocable mundo;
 	auto material_suelo = make_shared<lambertiano>(color(0.5,0.5,0.5));
@@ -55,12 +68,13 @@ lista_chocable escena_aleatoria(){
 	mundo.agregar(make_shared<esfera>(punto3(0,1,0),1.0,material1));
 	mundo.agregar(make_shared<esfera>(punto3(-4,1,0),1.0,material2));
 	mundo.agregar(make_shared<esfera>(punto3(4,1,0),1.0,material3));
+	
 	mundo.agregar(make_shared<esfera>(punto3(0,-1000,0),1000,material_suelo));
 	
 	// return mundo;
 
 	lista_chocable objetos;
-	objetos.agregar(make_shared<nodo_bvh>(mundo,0,0));
+	objetos.agregar(make_shared<nodo_bvh>(mundo,0,1));
 	return objetos;
 
 	
@@ -80,7 +94,7 @@ color color_de_rayo(const rayo& r, const chocable& mundo, int profundidad){
 		color atenuacion;
 		if(registro.material_ptr->refleja(r,registro,atenuacion,rayo_reflejado))
 			//para mezclar los colores, los multiplico componente a componente
-			//esto funciona porque las componentes siempre var�an entre 0 y 1
+			//esto funciona porque las componentes siempre varian entre 0 y 1
 			//entonces multiplicar dos colores siempre da como resultado otro color v�lido
 			return atenuacion * color_de_rayo(rayo_reflejado,mundo, profundidad - 1);
 		else return color(0,0,0);
@@ -111,11 +125,11 @@ int main() {
 	
 	//uso(1)
 	const auto relacion_de_aspecto = 16.0 / 9.0;
-	const int ancho = 500;
+	const int ancho = 400;
 	//uso (2)
 	const int alto= static_cast<int>(ancho / relacion_de_aspecto);
-	const int muestras_por_pixel  = 3;
-	const int profundidad_maxima = 3;
+	const int muestras_por_pixel  = 10;
+	const int profundidad_maxima = 5;
 	
 	cout << "P3\n" << ancho << ' ' << alto << "\n255\n";
 
@@ -142,6 +156,7 @@ int main() {
 		cerr << "\rScanlines remaining: " << j << ' ' << flush;
 		for (int i = 0; i < ancho; ++i) {
 			color pixel_color(0,0,0);
+				
 			
 			
 			//el color de cada pixel es el promedio de los colores de ese pixel 

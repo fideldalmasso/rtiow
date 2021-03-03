@@ -55,10 +55,9 @@ bool lista_chocable::caja_delimitadora(double tiempo0, double tiempo1, aabb& caj
 	bool es_la_primer_caja = true;
 	
 	for(const auto& objeto : objetos){
-		if(!objeto->caja_delimitadora(tiempo0,tiempo1,caja_temp)) 
-			return false;
+		if(!objeto->caja_delimitadora(tiempo0,tiempo1,caja_temp)) return false;
 		
-		caja_saliente = es_la_primer_caja  ? caja_temp : aabb::caja_englobadora(caja_saliente,caja_temp);
+		caja_saliente = es_la_primer_caja  ? caja_temp : caja_agrupadora(caja_saliente,caja_temp);
 		es_la_primer_caja = false;
 	}
 	return true;

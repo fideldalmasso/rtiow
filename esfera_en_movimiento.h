@@ -100,7 +100,7 @@ bool esfera_en_movimiento::choca(const rayo& r, double t_min, double t_max, regi
 bool esfera_en_movimiento::caja_delimitadora(double _tiempo0, double _tiempo1, aabb& caja_saliente) const{
 	aabb caja0( centro(_tiempo0)- vec3(radio,radio,radio), centro(_tiempo0) + vec3(radio,radio,radio));
 	aabb caja1( centro(_tiempo1)- vec3(radio,radio,radio), centro(_tiempo1) + vec3(radio,radio,radio));
-	caja_saliente = aabb::caja_englobadora(caja0,caja1);
+	caja_saliente = caja_agrupadora(caja0,caja1);
 	return true;
 }
 
