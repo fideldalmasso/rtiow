@@ -15,6 +15,15 @@ public:
 	punto3 centro;
 	double radio;
 	shared_ptr<material> material_ptr;
+
+private:
+	static void get_uv_esfera(const punto3& p, double& u, double& v){
+		auto tita = acos(-p.y());
+		auto phi = atan2(-p.z(), p.x()) + pi;
+
+		u = phi/ (2*pi);
+		v = tita/pi;
+	}
 };
 
 
@@ -53,32 +62,29 @@ bool esfera::choca(const rayo& r, double t_min, double t_max, registro_choque& r
 	auto medio_b = producto_punto(co,u);
 	auto c = co.longitud_cuadrada() - radio*radio;
 	auto discriminante = medio_b*medio_b - a*c;
+
+	if(discriminante<0) return false; //el rayo NO toca la esfera
+
+	auto raiz_discriminante = sqrt(discriminante);
+
+	auto raiz = (-medio_b - raiz_discriminante) / a; //formula resolvente con menos
 	
-	if(discriminante>0){ //el rayo toca la esfera
-		auto raiz = sqrt(discriminante);
-		auto temp = (-medio_b - raiz) / a; //formula resolvente
+	if(raiz < t_min || raiz > t_max){
 		
-		if(temp < t_max && temp > t_min){ //pruebo la formula con -
-			registro.t = temp;
-			registro.p = r.en(registro.t);
-			
-			vec3 normal_saliente = (registro.p - centro) / radio;
-			registro.set_cara_y_normal(r,normal_saliente);
-			registro.material_ptr = material_ptr;
-			return true;
-		}
-		temp = (-medio_b + raiz) / a;
+		raiz = (-medio_b + raiz_discriminante) / a;  //formula resolvente con mas
 		
-		if(temp < t_max && temp > t_min){ //pruebo la formula con +
-			registro.t = temp;
-			registro.p = r.en(registro.t);
-			vec3 normal_saliente = (registro.p - centro) / radio;
-			registro.set_cara_y_normal(r,normal_saliente);
-			registro.material_ptr = material_ptr;
-			return true;
-		}
+		if(raiz < t_min || raiz> t_max) return false;  //el rayo NO toca la esfera dentro del tiempo indicado
 	}
-	return false; //el rayo no toca la esfera
+
+	registro.t = raiz;
+	registro.p = r.en(registro.t);
+
+	vec3 normal_saliente = (registro.p - centro) / radio;
+	registro.set_cara_y_normal(r,normal_saliente);
+	get_uv_esfera(normal_saliente, registro.u, registro.v);
+	registro.material_ptr = material_ptr;
+
+	return true;
 	
 }
 

@@ -11,6 +11,8 @@ struct registro_choque{
 	vec3 normal;
 	shared_ptr<material> material_ptr;
 	double t;
+	double u;
+	double v;
 	bool cara_frontal;
 	
 	inline void set_cara_y_normal(const rayo& r, const vec3& normal_saliente){

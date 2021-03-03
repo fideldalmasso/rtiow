@@ -125,7 +125,7 @@ int main() {
 	
 	//uso(1)
 	const auto relacion_de_aspecto = 16.0 / 9.0;
-	const int ancho = 400;
+	const int ancho = 200;
 	//uso (2)
 	const int alto= static_cast<int>(ancho / relacion_de_aspecto);
 	const int muestras_por_pixel  = 10;

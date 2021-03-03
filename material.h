@@ -1,6 +1,7 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 #include "rtweekend.h"
+#include "textura.h"
 
 double schlick(double coseno, double indice_de_refraccion){
 	auto r0 = (1 - indice_de_refraccion) / (1 + indice_de_refraccion);
@@ -15,16 +16,20 @@ public:
 
 class lambertiano : public material {
 public:
-	lambertiano(const color&a) : albedo(a) {}
+	lambertiano(const color& a) : albedo(make_shared<color_solido>(a)) {}
+	lambertiano(shared_ptr<textura> a): albedo(a){}
+	
+	// lambertiano(const color&a) : albedo(a) {}
 	
 	virtual bool refleja(const rayo& rayo_incidente, const registro_choque& registro, color& atenuacion, rayo& rayo_reflejado) const{
 		vec3 direccion_reflejada  = registro.normal + vector_unitario_aleatorio();
 		rayo_reflejado = rayo(registro.p, direccion_reflejada, rayo_incidente.tiempo());
-		atenuacion = albedo;
+		atenuacion = albedo->valor(registro.u,registro.v,registro.p);
 		return true;
 	}
 public:
-	color albedo;
+	// color albedo;
+	shared_ptr<textura> albedo;
 	
 };
 
