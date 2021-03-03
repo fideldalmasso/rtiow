@@ -10,7 +10,7 @@ public:
 	punto3 min() const {return minimo;}
 	punto3 max() const {return maximo;}
 	
-	inline bool choca(const rayo& r, double t_min, double t_max) const {
+	bool choca(const rayo& r, double t_min, double t_max) const {
 		
 		// sabemos que la recta es y = A + t*B
 		// y que los puntos min y max definen los planos de interseccion de la bounding box
@@ -28,31 +28,42 @@ public:
 				std::swap(t0,t1);
 			
 			t_min = t0 > t_min ? t0 : t_min;
-			t_max = t1 < t_min ? t1 : t_max;
+			t_max = t1 < t_max ? t1 : t_max;
 			
 			if(t_max <= t_min)
 				return false;
 		}
 		
 		return true;
+
+		//OTRA IMPLEMENTACION (MAS LENTA)
+		// for(int a=0;a<3;a++){
+		// 	auto t0 = fmin((minimo[a] - r.origen()[a])/r.direccion()[a],
+		// 					(maximo[a] - r.origen()[a])/r.direccion()[a]);
+		// 	auto t1 = fmax((minimo[a] - r.origen()[a])/r.direccion()[a],
+		// 					(maximo[a] - r.origen()[a])/r.direccion()[a]);
+		// 	t_min = fmax(t0,t_min);
+		// 	t_max = fmin(t1,t_max);
+		// 	if(t_max<=t_min)
+		// 		return false;
+		// }
+		// return true;
 	}
-	
-	static const aabb caja_englobadora(aabb caja0, aabb caja1){
-		punto3 punto_mas_chico(fmin(caja0.min().x(), caja1.min().x()),
-					 fmin(caja0.min().y(), caja1.min().y()),
-					 fmin(caja0.min().z(), caja1.min().z()));
-		
-		punto3 punto_mas_grande(fmin(caja0.max().x(), caja1.max().x()),
-					 fmin(caja0.max().y(), caja1.max().y()),
-					 fmin(caja0.max().z(), caja1.max().z()));
-		
-		return aabb(punto_mas_chico,punto_mas_grande);
-	}
-	
+
 	punto3 minimo;
 	punto3 maximo;	
 };
 
-
+	aabb caja_agrupadora(aabb caja0, aabb caja1){
+		punto3 punto_mas_chico(  fmin(caja0.min().x(), caja1.min().x()),
+								 fmin(caja0.min().y(), caja1.min().y()),
+								 fmin(caja0.min().z(), caja1.min().z()));
+		
+		punto3 punto_mas_grande( fmax(caja0.max().x(), caja1.max().x()),
+								 fmax(caja0.max().y(), caja1.max().y()),
+								 fmax(caja0.max().z(), caja1.max().z()));
+		
+		return aabb(punto_mas_chico,punto_mas_grande);
+	}
 
 #endif
