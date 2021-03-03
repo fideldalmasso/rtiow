@@ -25,4 +25,28 @@ class color_solido : public textura{
 };
 
 
+class textura_damas : public textura{
+    public:
+        textura_damas(){}
+        
+        textura_damas(shared_ptr<textura> _par, shared_ptr<textura> _impar):
+        par(_par),impar(_impar){}
+
+        textura_damas(color c1,color c2):
+        par(make_shared<color_solido>(c1)),impar(make_shared<color_solido>(c2)){}
+
+
+        virtual color valor(double u, double v, const punto3& p) const override{
+            auto senos = sin(10*p.x())*sin(10*p.y())*sin(10*p.z());
+            if(senos < 0)
+                return impar->valor(u,v,p);
+            else
+                return par->valor(u,v,p);
+        }
+
+    public:
+        shared_ptr<textura> par;
+        shared_ptr<textura> impar;    
+};
+
 #endif
