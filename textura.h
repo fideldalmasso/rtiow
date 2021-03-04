@@ -57,8 +57,17 @@ class textura_ruido : public textura{
         textura_ruido(double esc) : escala(esc) {}
 
         virtual color valor(double u, double v, const punto3& p) const override{
-            //es necesario mapear [-1,1] a [0,1]
-            return color(1,1,1)*0.5*(1.0+ruido.ruido(escala*p));
+            //el mas basico
+            //return color(1,1,1)*ruido.ruido(escala*p);
+
+            //usar vectores y no doubles. es necesario mapear [-1,1] a [0,1]
+            //return color(1,1,1)*0.5*(1.0+ruido.ruido(escala*p));
+
+            //usar turbulencia
+            //return color(1,1,1)*ruido.turbulencia(escala*p);
+
+            //efecto marmol
+            return color(1,1,1)*0.5*(1 + sin(escala*p.z() + 10*ruido.turbulencia(p)));
         }
     public:
         perlin ruido;

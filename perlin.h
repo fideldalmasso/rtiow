@@ -53,6 +53,20 @@ class perlin{
             return interpolacion_perlin(c,u,v,w);
         }
 
+        double turbulencia(const punto3& p, int profundidad=7) const {
+            //consiste en la suma de varias llamadas a ruido
+            auto accum = 0.0;
+            auto temp_p = p;
+            auto peso = 1.0;
+
+            for(int i=0; i< profundidad; i++){
+                accum+= peso*ruido(temp_p);
+                peso *= 0.5;
+                temp_p *= 2; //duplica el tamanio del punto
+            }
+            return fabs(accum);
+        }
+
     private:
         static const int cant_puntos = 256;
         vec3* vectores_aleatorios; //arreglo con 256 vectores pseudo-aleatorios (doubles)
