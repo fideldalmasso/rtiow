@@ -2,6 +2,7 @@
 #define TEXTURA_H
 
 #include "rtweekend.h"
+#include "perlin.h"
 
 class textura{
     public:
@@ -47,6 +48,18 @@ class textura_damas : public textura{
     public:
         shared_ptr<textura> par;
         shared_ptr<textura> impar;    
+};
+
+
+class textura_ruido : public textura{
+    public:
+        textura_ruido(){}
+
+        virtual color valor(double u, double v, const punto3& p) const override{
+            return color(1,1,1)*ruido.ruido(p);
+        }
+    public:
+        perlin ruido;
 };
 
 #endif

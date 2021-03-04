@@ -10,6 +10,7 @@
 #include "esfera_en_movimiento.h"
 #include "bvh.h"
 #include "textura.h"
+
 using namespace std;
 
 lista_chocable escena_aleatoria2(){
@@ -33,6 +34,19 @@ lista_chocable dos_esferas(){
 
 	objetos.agregar(make_shared<esfera>(punto3(0,-10,0),10,material));
 	objetos.agregar(make_shared<esfera>(punto3(0,10,0),10,material));
+
+	return objetos;
+}
+
+
+lista_chocable dos_esferas_perlin(){
+	lista_chocable objetos;
+
+	auto perlin_tex = make_shared<textura_ruido>();
+	auto material = make_shared<lambertiano>(perlin_tex);
+
+	objetos.agregar(make_shared<esfera>(punto3(0,-1000,0),1000,material));
+	objetos.agregar(make_shared<esfera>(punto3(0,2,0),2,material));
 
 	return objetos;
 }
@@ -156,12 +170,12 @@ int main() {
 	//mundo
 
 	lista_chocable mundo;
-	punto3 mirar_desde(13,2,3);
-	punto3 mirar_hacia(0,0,0);
-	auto apertura = 0.1;
+	punto3 mirar_desde;
+	punto3 mirar_hacia;
+	auto apertura = 0.0;
 	auto fov_vertical = 40.0;
 
-	switch(0){
+	switch(3){
 		case 1:
 			mundo = escena_aleatoria();
 			mirar_desde = punto3(13,2,3);
@@ -169,13 +183,20 @@ int main() {
 			fov_vertical = 20.0;
 			apertura = 0.1;
 			break;
-		default:
 		case 2:
 			mundo = dos_esferas();
 			mirar_desde = punto3(13,2,13);
 			mirar_hacia = punto3(0,0,0);
 			fov_vertical = 20.0;
 			break;
+		default:
+		case 3:
+			mundo = dos_esferas_perlin();
+			mirar_desde = punto3(13,2,3);
+			mirar_hacia = punto3(0,0,0);
+			fov_vertical = 20.0;
+			break;
+
 	}
 
 

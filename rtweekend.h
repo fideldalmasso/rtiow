@@ -25,7 +25,7 @@ inline double clamp(double x, double min, double max){
 	return x;
 }
 	
-inline double double_aleatorio(){
+inline double double_aleatorio(){ //numero entre 0 y 1
 	// return rand() / (RAND_MAX + 1.0);
 	static std::uniform_real_distribution<double> distribution(0.0,1.0);
 	static std::mt19937 generator;
