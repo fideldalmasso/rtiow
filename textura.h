@@ -54,12 +54,14 @@ class textura_damas : public textura{
 class textura_ruido : public textura{
     public:
         textura_ruido(){}
+        textura_ruido(double sc) : escala(sc) {}
 
         virtual color valor(double u, double v, const punto3& p) const override{
-            return color(1,1,1)*ruido.ruido(p);
+            return color(1,1,1)*ruido.ruido(escala*p);
         }
     public:
         perlin ruido;
+        double escala;
 };
 
 #endif

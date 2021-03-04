@@ -11,9 +11,9 @@ class perlin{
                 arreglo_aleatorio[i] = double_aleatorio();
             }
 
-            perm_x = perlin_generar_permutacion();
-            perm_y = perlin_generar_permutacion();
-            perm_z = perlin_generar_permutacion();
+            perm_x = perlin_generar_perm();
+            perm_y = perlin_generar_perm();
+            perm_z = perlin_generar_perm();
 
         }
 
@@ -26,11 +26,17 @@ class perlin{
 
         double ruido(const vec3& p) const{
 
-
+            //u,v,w son la parte no entera de x,y,z
+            //osea, son la distancia a la grilla de numeros enteros
             auto u = p.x() - floor(p.x());
             auto v = p.y() - floor(p.y());
             auto w = p.z() - floor(p.z());
 
+
+            //la funcion f(x) = 3x^2 - 2x^3 entre [0,1] es una ease curve y se conoce como SMOOTHSTEP
+            //lo que hace es exagerar la proximidad a los extremos de un valor entre [0,1]
+            //por ejemplo: smoothstep(0.8) -> 0.896
+            //             smoothstep(0.5) -> 0.5
             u = u*u*(3-2*u);
             v = v*v*(3-2*v);
             w = w*w*(3-2*w);
@@ -38,13 +44,15 @@ class perlin{
 
             //& == AND
             //^ == XOR
+            //x&255 == mod(x,256)
 
+            //i,j,k son la parte entera de x,y,z
             auto i = static_cast<int>(floor(p.x()));
             auto j = static_cast<int>(floor(p.y()));
             auto k = static_cast<int>(floor(p.z()));
 
+            //calcular los 8 puntos del cubo que contiene a p
             double c[2][2][2];
-
             for(int di=0; di<2; di++){
                 for(int dj=0; dj<2; dj++){
                     for(int dk=0; dk<2; dk++){
@@ -53,17 +61,17 @@ class perlin{
                 }
             }
             
-            return interpolacion_trilinear(c,u,v,w);
+            return interpolacion_trilineal(c,u,v,w);
         }
 
     private:
         static const int cant_puntos = 256;
-        double* arreglo_aleatorio; //arreglo con 256 doubles aleatorios
+        double* arreglo_aleatorio; //arreglo con 256 gradientes pseudo-aleatorios (doubles)
         int* perm_x;             //arreglo con numeros del 0 a 255, desordenados
         int* perm_y;             //lo mismo aca
         int* perm_z;             //lo mismo aca
 
-        static int* perlin_generar_permutacion(){
+        static int* perlin_generar_perm(){
             auto p  = new int[cant_puntos];
             
             for(int i = 0; i< perlin::cant_puntos; i++)
@@ -82,7 +90,7 @@ class perlin{
             }
         }
 
-        static double interpolacion_trilinear(double c[2][2][2], double u, double v, double w){
+        static double interpolacion_trilineal(double c[2][2][2], double u, double v, double w){
             auto accum = 0.0;
             
             for(int i=0; i<2; i++){

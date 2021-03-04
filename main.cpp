@@ -42,7 +42,7 @@ lista_chocable dos_esferas(){
 lista_chocable dos_esferas_perlin(){
 	lista_chocable objetos;
 
-	auto perlin_tex = make_shared<textura_ruido>();
+	auto perlin_tex = make_shared<textura_ruido>(4);
 	auto material = make_shared<lambertiano>(perlin_tex);
 
 	objetos.agregar(make_shared<esfera>(punto3(0,-1000,0),1000,material));
