@@ -3,6 +3,7 @@
 
 #include "rtweekend.h"
 #include "perlin.h"
+#include "rtw_stb_image.h"
 
 class textura{
     public:
@@ -73,5 +74,58 @@ class textura_ruido : public textura{
         perlin ruido;
         double escala;
 };
+
+
+class textura_imagen : public textura{
+    public: 
+        const static int bytes_por_pixel = 3;
+
+        textura_imagen():
+        datos(nullptr),ancho(0),alto(0),bytes_por_linea(0){}
+
+        textura_imagen(const char* nombre_archivo){
+            auto componentes_por_pixel = bytes_por_pixel;
+            
+            datos = stbi_load(nombre_archivo,&ancho,&alto,&componentes_por_pixel,componentes_por_pixel);
+            
+            if(!datos){
+                std::cerr << "ERROR: No se pudo cargar la imagen de la textura '" << nombre_archivo << "'\n";
+                ancho = alto = 0;
+            }
+            bytes_por_linea = bytes_por_pixel*ancho;
+
+            
+        }
+
+        ~textura_imagen(){
+            delete datos;
+        }
+
+        virtual color valor(double u, double v, const vec3& p) const override{
+            if(datos==nullptr)
+                return color(0,1,1);
+
+            u = clamp(u,0.0,1.0);
+            v = 1.0 - clamp(v,0.0, 1.0);
+
+            auto i = static_cast<int>(u*ancho);
+            auto j = static_cast<int>(v*alto);
+
+            if(i>=ancho) i = ancho-1;
+            if(j>=alto) j = alto-1;
+
+            const auto escala_de_color = 1.0 / 255.0;
+            auto pixel = datos + j*bytes_por_linea + i*bytes_por_pixel;
+
+            return color(escala_de_color*pixel[0],escala_de_color*pixel[1],escala_de_color*pixel[2]);
+        }
+
+    private:
+        unsigned char* datos;
+        int ancho, alto;
+        int bytes_por_linea;
+};
+
+
 
 #endif

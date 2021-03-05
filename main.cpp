@@ -52,6 +52,14 @@ lista_chocable dos_esferas_perlin(){
 }
 
 
+lista_chocable tierra(){
+	auto textura_tierra = make_shared<textura_imagen>("../mapa.jpg");
+	auto superficie_tierra = make_shared<lambertiano>(textura_tierra);
+	auto globo = make_shared<esfera>(punto3(0,0,0),2,superficie_tierra);
+
+	return lista_chocable(globo);
+}
+
 lista_chocable escena_aleatoria(){
 	lista_chocable mundo;
 	// auto material_suelo = make_shared<lambertiano>(color(0.5,0.5,0.5));
@@ -157,7 +165,7 @@ int main() {
 	
 	//uso(1)
 	const auto relacion_de_aspecto = 16.0 / 9.0;
-	const int ancho = 400;
+	const int ancho = 1000;
 	//uso (2)
 	const int alto= static_cast<int>(ancho / relacion_de_aspecto);
 	const int muestras_por_pixel  = 10;
@@ -175,7 +183,7 @@ int main() {
 	auto apertura = 0.0;
 	auto fov_vertical = 40.0;
 
-	switch(3){
+	switch(0){
 		case 1:
 			mundo = escena_aleatoria();
 			mirar_desde = punto3(13,2,3);
@@ -189,10 +197,16 @@ int main() {
 			mirar_hacia = punto3(0,0,0);
 			fov_vertical = 20.0;
 			break;
-		default:
 		case 3:
 			mundo = dos_esferas_perlin();
 			mirar_desde = punto3(13,2,3);
+			mirar_hacia = punto3(0,0,0);
+			fov_vertical = 20.0;
+			break;
+		default:
+		case 4:
+			mundo = tierra();
+			mirar_desde = punto3(13,2,13);
 			mirar_hacia = punto3(0,0,0);
 			fov_vertical = 20.0;
 			break;
