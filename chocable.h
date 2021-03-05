@@ -28,7 +28,7 @@ struct registro_choque{
 
 class chocable {
 public:
-	virtual bool choca(const rayo& r, double t_min, double t_max, registro_choque& rec) const = 0;
+	virtual bool choca(const rayo& r, double t_min, double t_max, registro_choque& registro) const = 0;
 	virtual bool caja_delimitadora(double tiempo0, double tiempo1, aabb& caja_saliente) const = 0;
 };
 

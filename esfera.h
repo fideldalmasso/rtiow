@@ -8,7 +8,7 @@ public:
 	esfera() {}
 	esfera(punto3 cen, double r, shared_ptr<material> m) : centro(cen), radio(r), material_ptr(m) {};
 	
-	virtual bool choca(const rayo& r, double t_min, double t_max, registro_choque& rec) const;
+	virtual bool choca(const rayo& r, double t_min, double t_max, registro_choque& registro) const;
 	virtual bool caja_delimitadora(double tiempo0, double tiempo1, aabb& caja_saliente) const override;
 	
 public:

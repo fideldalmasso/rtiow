@@ -11,6 +11,11 @@ double schlick(double coseno, double indice_de_refraccion){
 
 class material{
 public:
+
+	virtual color emitido(double u, double v, const punto3& p) const{
+		return color(0,0,0);
+	}
+
 	virtual bool refleja(const rayo& rayo_incidente, const registro_choque& registro, color& atenuacion, rayo& rayo_reflejado) const = 0;
 };
 
@@ -20,7 +25,8 @@ public:
 	lambertiano(shared_ptr<textura> a): albedo(a){}
 	
 	// lambertiano(const color&a) : albedo(a) {}
-	
+
+
 	virtual bool refleja(const rayo& rayo_incidente, const registro_choque& registro, color& atenuacion, rayo& rayo_reflejado) const{
 		vec3 direccion_reflejada  = registro.normal + vector_unitario_aleatorio();
 		rayo_reflejado = rayo(registro.p, direccion_reflejada, rayo_incidente.tiempo());
@@ -87,6 +93,24 @@ public:
 	double indice_de_refraccion;
 };
 
+class luz_difusa : public material{
+	public:
+		luz_difusa(shared_ptr<textura> a): emitir(a){}
+		
+		luz_difusa(color c):emitir(make_shared<color_solido>(c)){}
+
+		virtual bool refleja(const rayo& rayo_incidente, const registro_choque& registro, color& atenuacion, rayo& rayo_reflejado) const override{
+			return false;
+		}
+
+		virtual color emitido(double u, double v, const punto3& p) const override {
+			return emitir->valor(u,v,p);
+		}
+
+	public:
+		shared_ptr<textura> emitir;
+
+};
 
 
 #endif

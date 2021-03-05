@@ -10,6 +10,7 @@
 #include "esfera_en_movimiento.h"
 #include "bvh.h"
 #include "textura.h"
+#include "aarect.h"
 
 using namespace std;
 
@@ -59,6 +60,23 @@ lista_chocable tierra(){
 
 	return lista_chocable(globo);
 }
+
+
+lista_chocable luz_simple(){
+	lista_chocable objetos;
+
+	auto perlin_tex = make_shared<textura_ruido>(4);
+	auto material = make_shared<lambertiano>(perlin_tex);
+
+	objetos.agregar(make_shared<esfera>(punto3(0,-1000,0),1000,material));
+	objetos.agregar(make_shared<esfera>(punto3(0,2,0),2,material));
+
+	auto luz = make_shared<luz_difusa>(color(4,4,4));
+	objetos.agregar(make_shared<rectangulo_xy>(3,5,1,3,-2,luz));
+
+	return objetos;
+}
+
 
 lista_chocable escena_aleatoria(){
 	lista_chocable mundo;
@@ -118,6 +136,26 @@ lista_chocable escena_aleatoria(){
 
 }
 
+color color_de_rayo(const rayo&r, const color& fondo, const chocable& mundo, int profundidad){
+	registro_choque registro;
+
+	if(profundidad<=0)
+		return color(0,0,0);
+	
+	if(!mundo.choca(r,0.001,infinito,registro))
+		return fondo;
+	
+	rayo reflejado;
+	color atenuacion;
+	color emitido = registro.material_ptr->emitido(registro.u,registro.v,registro.p);
+
+	if(!registro.material_ptr->refleja(r,registro,atenuacion,reflejado))
+		return emitido;
+	
+	return emitido + atenuacion * color_de_rayo(reflejado,fondo,mundo,profundidad-1);
+}
+
+
 color color_de_rayo(const rayo& r, const chocable& mundo, int profundidad){ 
 	registro_choque registro;
 	
@@ -165,10 +203,10 @@ int main() {
 	
 	//uso(1)
 	const auto relacion_de_aspecto = 16.0 / 9.0;
-	const int ancho = 1000;
+	const int ancho = 300;
 	//uso (2)
 	const int alto= static_cast<int>(ancho / relacion_de_aspecto);
-	const int muestras_por_pixel  = 10;
+	int muestras_por_pixel  = 10;
 	const int profundidad_maxima = 10;
 	
 	cout << "P3\n" << ancho << ' ' << alto << "\n255\n";
@@ -182,10 +220,12 @@ int main() {
 	punto3 mirar_hacia;
 	auto apertura = 0.0;
 	auto fov_vertical = 40.0;
+	color fondo(0,0,0);
 
 	switch(0){
 		case 1:
 			mundo = escena_aleatoria();
+			fondo = color(0.7,0.8,1.0);
 			mirar_desde = punto3(13,2,3);
 			mirar_hacia = punto3(0,0,0);
 			fov_vertical = 20.0;
@@ -193,24 +233,34 @@ int main() {
 			break;
 		case 2:
 			mundo = dos_esferas();
+			fondo = color(0.7,0.8,1.0);
 			mirar_desde = punto3(13,2,13);
 			mirar_hacia = punto3(0,0,0);
 			fov_vertical = 20.0;
 			break;
 		case 3:
 			mundo = dos_esferas_perlin();
+			fondo = color(0.7,0.8,1.0);
 			mirar_desde = punto3(13,2,3);
 			mirar_hacia = punto3(0,0,0);
 			fov_vertical = 20.0;
 			break;
-		default:
 		case 4:
 			mundo = tierra();
+			fondo = color(0.7,0.8,1.0);
 			mirar_desde = punto3(13,2,13);
 			mirar_hacia = punto3(0,0,0);
 			fov_vertical = 20.0;
 			break;
-
+		default:
+		case 5:
+			mundo = luz_simple();
+			fondo = color(0.0,0.0,0.0);
+			muestras_por_pixel = 400;
+			mirar_desde = punto3(26,3,6);
+			mirar_hacia = punto3(0,2,0);
+			fov_vertical = 20.0;
+			break;
 	}
 
 
@@ -244,7 +294,7 @@ int main() {
 				auto u = (i + double_aleatorio()) / (ancho-1);
 				auto v = (j + double_aleatorio()) / (alto-1);
 				rayo r = cam.get_rayo(u,v);
-				pixel_color += color_de_rayo(r,mundo, profundidad_maxima);
+				pixel_color += color_de_rayo(r,fondo,mundo, profundidad_maxima);
 			}
 			escribir_color(cout,pixel_color, muestras_por_pixel);
 		}
