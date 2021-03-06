@@ -11,6 +11,7 @@
 #include "bvh.h"
 #include "textura.h"
 #include "aarect.h"
+#include "caja.h"
 
 using namespace std;
 
@@ -74,9 +75,35 @@ lista_chocable luz_simple(){
 	auto luz = make_shared<luz_difusa>(color(4,4,4));
 	objetos.agregar(make_shared<rectangulo_xy>(3,5,1,3,-2,luz));
 
+	
 	return objetos;
 }
 
+
+lista_chocable caja_cornell(){
+	lista_chocable objetos;
+
+	auto rojo = make_shared<lambertiano>(color(.65,.05,.05));
+	auto verde = make_shared<lambertiano>(color(.12,.45,.15));
+	auto blanco = make_shared<lambertiano>(color(.73,.73,.73));
+	
+	auto luz = make_shared<luz_difusa>(color(15,15,15));
+
+	objetos.agregar(make_shared<rectangulo_yz>(0,555,0,555,555,verde));
+	objetos.agregar(make_shared<rectangulo_yz>(0,555,0,555,0,rojo));
+
+	objetos.agregar(make_shared<rectangulo_xz>(0,555,0,555,0,blanco));
+	objetos.agregar(make_shared<rectangulo_xz>(0,555,0,555,555,blanco));
+	objetos.agregar(make_shared<rectangulo_xy>(0,555,0,555,555,blanco));
+
+	objetos.agregar(make_shared<rectangulo_xz>(213,343,227,332,554,luz));
+
+	objetos.agregar(make_shared<caja>(punto3(130,0,65),punto3(295,165,230),blanco));
+	objetos.agregar(make_shared<caja>(punto3(265,0,295),punto3(430,330,460),blanco));
+
+
+	return objetos;
+}
 
 lista_chocable escena_aleatoria(){
 	lista_chocable mundo;
@@ -197,20 +224,10 @@ int main() {
 	// archivo y parametros
 
 	freopen("../out.ppm", "w", stdout);
-	//(1) rda = ancho / alto ->
-	//(2) ancho = rda * alto
-	//(3) alto = ancho / rda
-	
-	//uso(1)
-	const auto relacion_de_aspecto = 16.0 / 9.0;
-	const int ancho = 300;
-	//uso (2)
-	const int alto= static_cast<int>(ancho / relacion_de_aspecto);
+	auto relacion_de_aspecto = 16.0 / 9.0;
+	int ancho = 300;
 	int muestras_por_pixel  = 10;
-	const int profundidad_maxima = 10;
-	
-	cout << "P3\n" << ancho << ' ' << alto << "\n255\n";
-
+	int profundidad_maxima = 10;
 
 
 	//mundo
@@ -252,7 +269,6 @@ int main() {
 			mirar_hacia = punto3(0,0,0);
 			fov_vertical = 20.0;
 			break;
-		default:
 		case 5:
 			mundo = luz_simple();
 			fondo = color(0.0,0.0,0.0);
@@ -261,8 +277,22 @@ int main() {
 			mirar_hacia = punto3(0,2,0);
 			fov_vertical = 20.0;
 			break;
+		default:
+		case 6:
+			mundo = caja_cornell();
+			relacion_de_aspecto = 1.0;
+			ancho = 200;
+			muestras_por_pixel = 200;
+			fondo = color(0,0,0);
+			mirar_desde = punto3(278,278,-800);
+			mirar_hacia = punto3(278,278,0);
+			fov_vertical = 40.0;
+			break;
 	}
-
+	
+	
+	const int alto= static_cast<int>(ancho / relacion_de_aspecto);
+	cout << "P3\n" << ancho << ' ' << alto << "\n255\n";
 
 	//camara
 
