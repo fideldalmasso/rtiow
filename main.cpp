@@ -1,5 +1,6 @@
 #include "rtweekend.h"
 #include "lista_chocable.h"
+#include "chocable.h"
 #include "esfera.h"
 #include "color.h"
 #include "camara.h"
@@ -98,8 +99,17 @@ lista_chocable caja_cornell(){
 
 	objetos.agregar(make_shared<rectangulo_xz>(213,343,227,332,554,luz));
 
-	objetos.agregar(make_shared<caja>(punto3(130,0,65),punto3(295,165,230),blanco));
-	objetos.agregar(make_shared<caja>(punto3(265,0,295),punto3(430,330,460),blanco));
+	shared_ptr<chocable> caja1 = make_shared<caja>(punto3(0,0,0),punto3(165,330,165),blanco);
+	caja1 = make_shared<rotar_y>(caja1,15);
+	caja1 = make_shared<trasladar>(caja1,vec3(265,0,295));
+	objetos.agregar(caja1);
+
+	shared_ptr<chocable> caja2 = make_shared<caja>(punto3(0,0,0),punto3(165,165,165),blanco);
+	caja2 = make_shared<rotar_y>(caja2,-18);
+	caja2 = make_shared<trasladar>(caja2,vec3(130,0,65));
+
+	objetos.agregar(caja2);
+
 
 
 	return objetos;
