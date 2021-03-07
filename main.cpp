@@ -151,6 +151,63 @@ lista_chocable caja_cornell_humo(){
 	return objetos;
 }
 
+lista_chocable escena_final(){
+	lista_chocable cajas1;
+	auto suelo = make_shared<lambertiano>(color(0.48,0.83,0.53));
+	
+	const int cajas_por_lado = 20;
+	for(int i = 0; i<cajas_por_lado; i++){
+		for(int j = 0; j<cajas_por_lado; j++){
+			auto w = 100.0;
+			auto x0 = -1000.0 + i*w;
+			auto z0 = -1000.0 + j*w;
+			auto y0 = 0.0;
+			auto x1= x0+w;
+			auto y1 = double_aleatorio(1,101);
+			auto z1 = z0+w;
+
+			cajas1.agregar(make_shared<caja>(punto3(x0,y0,z0),punto3(x1,y1,z1),suelo));
+		}
+	}
+
+	lista_chocable objetos;
+	objetos.agregar(make_shared<nodo_bvh>(cajas1,0,1));
+
+	auto luz = make_shared<luz_difusa>(color(7,7,7));
+	objetos.agregar(make_shared<rectangulo_xz>(123,423,147,412,554,luz));
+
+	auto centro1 = punto3(400,400,200);
+	auto centro2 = centro1 + vec3(30,0,0);
+	auto esfera_en_movimiento_material = make_shared<lambertiano>(color(0.7,0.3,0.1));
+
+	objetos.agregar(make_shared<esfera_en_movimiento>(centro1,centro2,0,1,50,esfera_en_movimiento_material));
+	objetos.agregar(make_shared<esfera>(punto3(260,150,45),50,make_shared<dialectrico>(1.5)));
+	objetos.agregar(make_shared<esfera>(punto3(0,150,145),50,make_shared<metalico>(color(0.8,0.8,0.90),1.0)));
+	// objetos.agregar(make_shared<esfera>(punto3(0,0,0),300,make_shared<metalico>(color(0.8,0.8,0.90),0.0)));
+	
+	auto borde = make_shared<esfera>(punto3(360,150,145),70,make_shared<dialectrico>(1.5));
+	objetos.agregar(borde);
+	objetos.agregar(make_shared<medio_constante>(borde,0.2,color(0.2,0.4,0.9)));
+	borde = make_shared<esfera>(punto3(0,0,0),5000,make_shared<dialectrico>(1.5));
+	objetos.agregar(make_shared<medio_constante>(borde,.0001,color(1,1,1)));
+
+	auto material_tierra = make_shared<lambertiano>(make_shared<textura_imagen>("../mapa.jpg"));
+	objetos.agregar(make_shared<esfera>(punto3(400,200,400),100,material_tierra));
+	auto textura_perlin = make_shared<textura_ruido>(0.1);
+	objetos.agregar(make_shared<esfera>(punto3(220,280,300),80,make_shared<lambertiano>(textura_perlin)));
+
+	lista_chocable cajas2;
+	auto blanco = make_shared<lambertiano>(color(.73,.73,.73));
+	int cant = 1000;
+	for(int j = 0; j< cant; j++){
+		cajas2.agregar(make_shared<esfera>(punto3::aleatorio(0,165),10,blanco));
+	}
+
+	objetos.agregar(make_shared<trasladar>(make_shared<rotar_y>(make_shared<nodo_bvh>(cajas2,0.0,1.0),15),vec3(-100,270,395)));
+
+
+	return objetos;
+}
 
 lista_chocable escena_aleatoria(){
 	lista_chocable mundo;
@@ -300,7 +357,7 @@ int main() {
 	int ancho = 300;
 	int muestras_por_pixel  = 10;
 	int profundidad_maxima = 10;
-
+	bool mostrar_ejes = false;
 
 	//mundo
 
@@ -359,7 +416,6 @@ int main() {
 			mirar_hacia = punto3(278,278,0);
 			fov_vertical = 40.0;
 			break;
-		default:
 		case 7:
 			mundo = caja_cornell_humo();
 			relacion_de_aspecto = 1.0;
@@ -370,8 +426,25 @@ int main() {
 			mirar_hacia = punto3(278,278,0);
 			fov_vertical = 40.0;
 			break;
+		default:
+		case 8:
+			mundo = escena_final();
+			relacion_de_aspecto = 1.0;
+			ancho = 1000;
+			muestras_por_pixel = 10000;
+			fondo = color(0,0,0);
+			mirar_desde = punto3(478,278,-600);
+			mirar_hacia = punto3(278,278,0);
+			fov_vertical = 40.0;
+			break;
 	}
 	
+	
+	if(mostrar_ejes){
+		mundo.agregar(make_shared<caja>(punto3(0,0,0),punto3(1000,10,10),make_shared<lambertiano>(color(1.0,1.0,1.0))));
+		mundo.agregar(make_shared<caja>(punto3(0,0,0),punto3(10,1000,10),make_shared<lambertiano>(color(1.0,1.0,1.0))));
+		mundo.agregar(make_shared<caja>(punto3(0,0,0),punto3(10,10,1000),make_shared<lambertiano>(color(1.0,1.0,1.0))));
+	}
 	
 	const int alto= static_cast<int>(ancho / relacion_de_aspecto);
 	cout << "P3\n" << ancho << ' ' << alto << "\n255\n";
