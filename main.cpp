@@ -5,14 +5,16 @@
 #include "color.h"
 #include "camara.h"
 #include "material.h"
-#include<iostream>
-#include <cstdio>
-#include <ctime>
 #include "esfera_en_movimiento.h"
 #include "bvh.h"
 #include "textura.h"
 #include "aarect.h"
 #include "caja.h"
+
+#include <ctime>
+#include <cstdio>
+#include<iostream>
+#include <thread>
 
 using namespace std;
 
@@ -227,7 +229,32 @@ color color_de_rayo(const rayo& r, const chocable& mundo, int profundidad){
 	// 0.5,0.7,1.0 es azul
 }
 
+void algoritmo(const int& ancho, const int& alto,  const color& fondo, const lista_chocable& mundo, const camara& cam, const int& profundidad_maxima, const int& muestras_por_pixel, shared_ptr<vector<color>> imagen){
+	int contador =0;
+	for (int j = alto -1; j >= 0; --j) {
+		cerr << "\rScanlines remaining: " << j << ' ' << flush;
+		for (int i = 0; i < ancho; ++i) {
+			
+			color pixel_color(0,0,0);
+				
+			//el color de cada pixel es el promedio de los colores de ese pixel 
+			//junto con los colores de los pixeles que lo rodean.
+			//aqui solo se acumula la suma, pero en escribir_color, se divide
+			//por la cantidad de muestras
 
+			for(int s = 0; s < muestras_por_pixel; ++s){
+				auto u = (i + double_aleatorio()) / (ancho-1);
+				auto v = (j + double_aleatorio()) / (alto-1);
+				rayo r = cam.get_rayo(u,v);
+				pixel_color += color_de_rayo(r,fondo,mundo, profundidad_maxima);
+			}
+			imagen->at(contador)= pixel_color;
+			contador++;
+			// escribir_color(cout,pixel_color, muestras_por_pixel);
+		}
+	}
+
+}
 
 int main() {
 	
@@ -291,7 +318,7 @@ int main() {
 		case 6:
 			mundo = caja_cornell();
 			relacion_de_aspecto = 1.0;
-			ancho = 200;
+			ancho = 1000;
 			muestras_por_pixel = 200;
 			fondo = color(0,0,0);
 			mirar_desde = punto3(278,278,-800);
@@ -314,33 +341,41 @@ int main() {
 
 	// programa
 
-
 	time_t inicio_ejecucion,fin_ejecucion;
 	time(&inicio_ejecucion);
 
-	for (int j = alto -1; j >= 0; --j) {
-		cerr << "\rScanlines remaining: " << j << ' ' << flush;
-		for (int i = 0; i < ancho; ++i) {
-			
-			color pixel_color(0,0,0);
-				
-			//el color de cada pixel es el promedio de los colores de ese pixel 
-			//junto con los colores de los pixeles que lo rodean.
-			//aqui solo se acumula la suma, pero en escribir_color, se divide
-			//por la cantidad de muestras
-
-
-			for(int s = 0; s < muestras_por_pixel; ++s){
-				auto u = (i + double_aleatorio()) / (ancho-1);
-				auto v = (j + double_aleatorio()) / (alto-1);
-				rayo r = cam.get_rayo(u,v);
-				pixel_color += color_de_rayo(r,fondo,mundo, profundidad_maxima);
-			}
-			escribir_color(cout,pixel_color, muestras_por_pixel);
-		}
+	int cantidad_hilos = thread::hardware_concurrency();
+	vector<thread> hilos(cantidad_hilos);
+	vector<shared_ptr<vector<color>>> imagenes(cantidad_hilos);
+	int operaciones_por_hilo = muestras_por_pixel/cantidad_hilos;
+	vector<int> muestras(cantidad_hilos,operaciones_por_hilo);
+	int modulo =muestras_por_pixel%cantidad_hilos; 
+	if(modulo!=0){
+		muestras.back()+=modulo;
 	}
+
+	int contador = 0;
+	for(thread &h : hilos){
+		imagenes.at(contador)=make_shared<vector<color>>(ancho*alto,color(0,0,0));
+		h = thread(algoritmo,ancho,alto,fondo,mundo,cam,profundidad_maxima,muestras.at(contador),imagenes.at(contador));
+		contador++;
+	}
+	for(thread &h : hilos)
+		h.join();
+
+	for(int p = 0; p<ancho*alto; p++){
+		color pixel_color(0,0,0);
+		for(int i=0;i<cantidad_hilos;i++){
+			pixel_color+=imagenes.at(i)->at(p);
+		}
+		escribir_color(cout,pixel_color,muestras_por_pixel);
+	}
+
 	time(&fin_ejecucion);
 	double tiempo_transcurrido = (double) fin_ejecucion - inicio_ejecucion;
 	fprintf(stderr,"\nTiempo transcurrido: %.1f",tiempo_transcurrido);
 	cerr << "\nDone.\n";
 }
+
+
+

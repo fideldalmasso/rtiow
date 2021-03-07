@@ -15,7 +15,8 @@
                 "-lstdc++",
                 "-Wall",
                 "--pedantic-errors",
-                "-O0"
+                "-O0",
+                "-lpthread"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
