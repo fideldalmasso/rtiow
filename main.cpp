@@ -10,6 +10,7 @@
 #include "textura.h"
 #include "aarect.h"
 #include "caja.h"
+#include "medio_constante.h"
 
 #include <ctime>
 #include <cstdio>
@@ -116,6 +117,40 @@ lista_chocable caja_cornell(){
 
 	return objetos;
 }
+
+
+lista_chocable caja_cornell_humo(){
+	lista_chocable objetos;
+
+	auto rojo = make_shared<lambertiano>(color(.65,.05,.05));
+	auto verde = make_shared<lambertiano>(color(.12,.45,.15));
+	auto blanco = make_shared<lambertiano>(color(.73,.73,.73));
+	
+	auto luz = make_shared<luz_difusa>(color(7,7,7));
+
+	objetos.agregar(make_shared<rectangulo_yz>(0,555,0,555,555,verde));
+	objetos.agregar(make_shared<rectangulo_yz>(0,555,0,555,0,rojo));
+
+	objetos.agregar(make_shared<rectangulo_xz>(0,555,0,555,0,blanco));
+	objetos.agregar(make_shared<rectangulo_xz>(0,555,0,555,555,blanco));
+	objetos.agregar(make_shared<rectangulo_xy>(0,555,0,555,555,blanco));
+
+	objetos.agregar(make_shared<rectangulo_xz>(113,443,127,432,554,luz));
+
+	shared_ptr<chocable> caja1 = make_shared<caja>(punto3(0,0,0),punto3(165,330,165),blanco);
+	caja1 = make_shared<rotar_y>(caja1,15);
+	caja1 = make_shared<trasladar>(caja1,vec3(265,0,295));
+
+	shared_ptr<chocable> caja2 = make_shared<caja>(punto3(0,0,0),punto3(165,165,165),blanco);
+	caja2 = make_shared<rotar_y>(caja2,-18);
+	caja2 = make_shared<trasladar>(caja2,vec3(130,0,65));
+
+	objetos.agregar(make_shared<medio_constante>(caja1,0.01,color(0,0,0)));
+	objetos.agregar(make_shared<medio_constante>(caja2,0.01,color(1,1,1)));
+
+	return objetos;
+}
+
 
 lista_chocable escena_aleatoria(){
 	lista_chocable mundo;
@@ -314,11 +349,21 @@ int main() {
 			mirar_hacia = punto3(0,2,0);
 			fov_vertical = 20.0;
 			break;
-		default:
 		case 6:
 			mundo = caja_cornell();
 			relacion_de_aspecto = 1.0;
 			ancho = 1000;
+			muestras_por_pixel = 200;
+			fondo = color(0,0,0);
+			mirar_desde = punto3(278,278,-800);
+			mirar_hacia = punto3(278,278,0);
+			fov_vertical = 40.0;
+			break;
+		default:
+		case 7:
+			mundo = caja_cornell_humo();
+			relacion_de_aspecto = 1.0;
+			ancho = 300;
 			muestras_por_pixel = 200;
 			fondo = color(0,0,0);
 			mirar_desde = punto3(278,278,-800);

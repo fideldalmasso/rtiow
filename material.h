@@ -94,22 +94,37 @@ public:
 };
 
 class luz_difusa : public material{
-	public:
-		luz_difusa(shared_ptr<textura> a): emitir(a){}
-		
-		luz_difusa(color c):emitir(make_shared<color_solido>(c)){}
+public:
+	luz_difusa(shared_ptr<textura> a): emitir(a){}
+	
+	luz_difusa(color c):emitir(make_shared<color_solido>(c)){}
 
-		virtual bool refleja(const rayo& rayo_incidente, const registro_choque& registro, color& atenuacion, rayo& rayo_reflejado) const override{
-			return false;
-		}
+	virtual bool refleja(const rayo& rayo_incidente, const registro_choque& registro, color& atenuacion, rayo& rayo_reflejado) const override{
+		return false;
+	}
 
-		virtual color emitido(double u, double v, const punto3& p) const override {
-			return emitir->valor(u,v,p);
-		}
+	virtual color emitido(double u, double v, const punto3& p) const override {
+		return emitir->valor(u,v,p);
+	}
 
-	public:
-		shared_ptr<textura> emitir;
+public:
+	shared_ptr<textura> emitir;
 
+};
+
+class isotropico : public material{
+public:
+	isotropico(color c): albedo(make_shared<color_solido>(c)){}
+	isotropico(shared_ptr<textura> t): albedo(t){}
+
+	virtual bool refleja(const rayo& rayo_incidente, const registro_choque& registro, color& atenuacion, rayo& rayo_reflejado) const override{
+		rayo_reflejado = rayo(registro.p,vector_en_esfera_unitaria_aleatorio(),rayo_incidente.tiempo());
+		atenuacion = albedo->valor(registro.u,registro.v,registro.p);
+		return true;
+	}
+
+public:
+	shared_ptr<textura> albedo;
 };
 
 
