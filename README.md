@@ -1,4 +1,10 @@
 # Ray Tracing in One Weekend libros 1 & 2
+Implementacion propia de los dos primeros libros sobre raytracing de Peter Shirley. Los libros se encuentran en: https://github.com/RayTracing/raytracing.github.io
+
+# Diferencias con el libro
+* Ejecución en múltiples hilos (tantos como sea posible)
+* Codeado en español
+* Documentación sobre las matemáticas más heavies
 
 # Cómo ejecutar
 `gcc main.cpp -o Debug2/rtiow.bin -I. -std=c++14 -lm -lstdc++ --pedantic-errors -O3 -lpthread && cd Debug2 && ./rtiow.bin && cd ..`
