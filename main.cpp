@@ -431,7 +431,7 @@ int main() {
 			mundo = escena_final();
 			relacion_de_aspecto = 1.0;
 			ancho = 1000;
-			muestras_por_pixel = 10000;
+			muestras_por_pixel = 1000;
 			fondo = color(0,0,0);
 			mirar_desde = punto3(478,278,-600);
 			mirar_hacia = punto3(278,278,0);
