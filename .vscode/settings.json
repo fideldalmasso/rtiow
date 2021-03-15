@@ -3,5 +3,6 @@
         "cmath": "cpp",
         "thread": "cpp",
         "iosfwd": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }
