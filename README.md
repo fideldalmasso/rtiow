@@ -41,3 +41,6 @@ Implementacion propia de los dos primeros libros sobre raytracing de Peter Shirl
 <img src="imagenes/27.jpg" width="400"/>
 <img src="imagenes/28.jpg" width="400"/>
 <img src="imagenes/29.jpg" width="400"/>
+<img src="imagenes/30.jpg" width="400"/>
+<img src="imagenes/31.jpg" width="400"/>
+<img src="imagenes/32.jpg" width="400"/>
