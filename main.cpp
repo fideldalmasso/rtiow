@@ -211,24 +211,30 @@ lista_chocable escena_final(){
 
 lista_chocable sistema_solar(){
 	lista_chocable objetos;
+	
+	vec3 postierra = vec3(0,0,0);
+	vec3 posluna = vec3(30,0,0);
+	vec3 possol = vec3(15,50,60);
+	
 	// objetos.agregar(make_shared<esfera>(punto3(0,0,0),20,make_shared<luz_difusa>(make_shared<textura_imagen>("../planetas/sol.png"))));
 
 	// auto borde = make_shared<esfera>(punto3(0,0,0),3000,make_shared<dialectrico>(1.5));
 	// objetos.agregar(make_shared<medio_constante>(borde,.001,make_shared<textura_imagen>("../planetas/espacio.jpg")));
 	// objetos.agregar(make_shared<medio_constante>(borde,.0001,color(1,1,1)));
-	auto tierra = make_shared<esfera>(punto3(-2,3,-4),10,make_shared<lambertiano>(make_shared<textura_imagen>("../planetas/tierra2.jpg")));
-	auto tierra2 = make_shared<esfera>(punto3(-2,3,-4),10.07,make_shared<lambertiano>(make_shared<textura_imagen>("../planetas/tierra2.jpg")));
 	// objetos.agregar(tierra);
 	// objetos.agregar(make_shared<esfera>(punto3(0,0,0),11,make_shared<dialectrico>(1.5)));
-	auto luna  = make_shared<esfera>(punto3(20,0,0),2,make_shared<lambertiano>(make_shared<textura_imagen>("../planetas/luna.png")));
-	auto luna2  = make_shared<esfera>(punto3(20,0,0),2.03,make_shared<lambertiano>(make_shared<textura_imagen>("../planetas/luna.png")));
+	auto tierra = make_shared<esfera>(postierra,10,make_shared<lambertiano>(make_shared<textura_imagen>("../planetas/tierra3.jpg")));
+	auto tierra2 = make_shared<esfera>(postierra,10.07,make_shared<lambertiano>(make_shared<textura_imagen>("../planetas/tierra3.jpg")));
+	auto luna  = make_shared<esfera>(posluna,4,make_shared<lambertiano>(make_shared<textura_imagen>("../planetas/luna.png")));
+	auto luna2  = make_shared<esfera>(posluna,4.05,make_shared<lambertiano>(make_shared<textura_imagen>("../planetas/luna.png")));
 	
 	
-	objetos.agregar(make_shared<esfera>(punto3(-13,30,-30),4,make_shared<luz_difusa>(color(100,100,100))));
+	objetos.agregar(make_shared<esfera>(possol,4,make_shared<luz_difusa>(color(100,100,100))));
+	// objetos.agregar(make_shared<rotar_y>(tierra,-45));
 	objetos.agregar(tierra);
-	objetos.agregar(make_shared<medio_constante>(tierra2,0.7,color(0,0,1)));
+	objetos.agregar(make_shared<medio_constante>(tierra2,0.6,color(0,0,0.9)));
 	objetos.agregar(luna);
-	objetos.agregar(make_shared<medio_constante>(luna2,0.6,color(0,0,0)));
+	objetos.agregar(make_shared<medio_constante>(luna2,0.3,color(0,0,0)));
 	
 	return objetos;
 }
@@ -463,13 +469,14 @@ int main() {
 		default:
 		case 9:
 			mundo = sistema_solar();
-			ancho = 1920;
-			profundidad_maxima = 300;
-			muestras_por_pixel = 2000;
+			ancho = 600;
+			relacion_de_aspecto = 1.0;
+			profundidad_maxima = 200;
+			muestras_por_pixel = 5000;
 			fondo = color(0,0,0);
-			mirar_desde = punto3(21.8,0.5,-2);
-			mirar_hacia = punto3(0,0,2);
-			fov_vertical = 75.0;
+			mirar_desde = punto3(-11.5,-10,30);
+			mirar_hacia = punto3(12,2,-7);
+			fov_vertical = 70.0;
 			break;
 	}
 	
@@ -486,7 +493,7 @@ int main() {
 	//camara
 
 	vec3 vup(0,1,0);
-	auto distancia_focal = 10.0; //(mirar_desde - mirar_hacia).longitud();
+	auto distancia_focal = 10;//(mirar_desde - mirar_hacia).longitud();
 	camara cam(mirar_desde,mirar_hacia,vup,fov_vertical,relacion_de_aspecto,apertura,distancia_focal,0.0,1.0);
 
 
