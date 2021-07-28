@@ -21,6 +21,9 @@
 
 using namespace std;
 
+
+void ejecutar(const escena & esc);
+
 lista_chocable escena_aleatoria2(){
 	lista_chocable mundo;
 	auto material2 = make_shared<lambertiano>(color(0.4,0.3,0.1));
@@ -353,11 +356,11 @@ color color_de_rayo(const rayo& r, const chocable& mundo, int profundidad){
 	// 0.5,0.7,1.0 es azul
 }
 
-void algoritmo(const int& ancho, const int& alto,  const color& fondo, const lista_chocable& mundo, const camara& cam, const int& profundidad_maxima, const int& muestras_por_pixel, shared_ptr<vector<color>> imagen){
+void algoritmo(const escena & esc, const int& muestras_por_pixel, shared_ptr<vector<color>> imagen){
 	int contador =0;
-	for (int j = alto -1; j >= 0; --j) {
-		cerr << "\rScanlines remaining: " << j << ' ' << flush;
-		for (int i = 0; i < ancho; ++i) {
+	for (int j = esc.alto -1; j >= 0; --j) {
+		// cerr << "\rScanlines remaining: " << j << ' ' << flush;
+		for (int i = 0; i < esc.ancho; ++i) {
 			
 			color pixel_color(0,0,0);
 				
@@ -366,11 +369,11 @@ void algoritmo(const int& ancho, const int& alto,  const color& fondo, const lis
 			//aqui solo se acumula la suma, pero en escribir_color, se divide
 			//por la cantidad de muestras
 
-			for(int s = 0; s < muestras_por_pixel; ++s){
-				auto u = (i + double_aleatorio()) / (ancho-1);
-				auto v = (j + double_aleatorio()) / (alto-1);
-				rayo r = cam.get_rayo(u,v);
-				pixel_color += color_de_rayo(r,fondo,mundo, profundidad_maxima);
+			for(int s = 0; s < esc.muestras_por_pixel; ++s){
+				auto u = (i + double_aleatorio()) / (esc.ancho-1);
+				auto v = (j + double_aleatorio()) / (esc.alto-1);
+				rayo r = esc.cam.get_rayo(u,v);
+				pixel_color += color_de_rayo(r,esc.fondo,esc.mundo, esc.profundidad_maxima);
 			}
 			imagen->at(contador)= pixel_color;
 			contador++;
@@ -452,7 +455,7 @@ int main() {
 			mundo = caja_cornell_humo();
 			relacion_de_aspecto = 1.0;
 			ancho = 300;
-			muestras_por_pixel = 200;
+			muestras_por_pixel = 10;
 			fondo = color(0,0,0);
 			mirar_desde = punto3(278,278,-800);
 			mirar_hacia = punto3(278,278,0);
@@ -498,9 +501,16 @@ int main() {
 	auto distancia_focal = 10;//(mirar_desde - mirar_hacia).longitud();
 	camara cam(mirar_desde,mirar_hacia,vup,fov_vertical,relacion_de_aspecto,apertura,distancia_focal,0.0,1.0);
 
-
-
+	
 	// programa
+
+	escena mi_escena = escena(ancho,alto,fondo,muestras_por_pixel,profundidad_maxima,mundo,cam);
+
+	ejecutar(mi_escena);
+}
+
+
+void ejecutar(const escena & esc){
 
 	time_t inicio_ejecucion,fin_ejecucion;
 	time(&inicio_ejecucion);
@@ -508,35 +518,37 @@ int main() {
 	int cantidad_hilos = thread::hardware_concurrency();
 	vector<thread> hilos(cantidad_hilos);
 	vector<shared_ptr<vector<color>>> imagenes(cantidad_hilos);
-	int operaciones_por_hilo = muestras_por_pixel/cantidad_hilos;
+	int operaciones_por_hilo = esc.muestras_por_pixel/cantidad_hilos;
 	vector<int> muestras(cantidad_hilos,operaciones_por_hilo);
-	int modulo =muestras_por_pixel%cantidad_hilos; 
+	int modulo =esc.muestras_por_pixel%cantidad_hilos; 
 	if(modulo!=0){
 		muestras.back()+=modulo;
 	}
 
 	int contador = 0;
 	for(thread &h : hilos){
-		imagenes.at(contador)=make_shared<vector<color>>(ancho*alto,color(0,0,0));
-		h = thread(algoritmo,ancho,alto,fondo,mundo,cam,profundidad_maxima,muestras.at(contador),imagenes.at(contador));
+		imagenes.at(contador)=make_shared<vector<color>>(esc.total_pixeles,color(0,0,0));
+		h = thread(algoritmo,esc,muestras.at(contador),imagenes.at(contador));
 		contador++;
 	}
 	for(thread &h : hilos)
 		h.join();
 
-	for(int p = 0; p<ancho*alto; p++){
+	for(int p = 0; p<esc.total_pixeles; p++){
 		color pixel_color(0,0,0);
 		for(int i=0;i<cantidad_hilos;i++){
 			pixel_color+=imagenes.at(i)->at(p);
 		}
-		escribir_color(cout,pixel_color,muestras_por_pixel);
+		escribir_color(cout,pixel_color,esc.muestras_por_pixel);
 	}
+
 
 	time(&fin_ejecucion);
 	double tiempo_transcurrido = (double) fin_ejecucion - inicio_ejecucion;
 	fprintf(stderr,"\nTiempo transcurrido: %.1f",tiempo_transcurrido);
 	cerr << "\nDone.\n";
-}
 
+
+}
 
 

@@ -13,20 +13,23 @@
 class escena{
 public:
 	
-	escena(int _ancho, int _alto, int _muestras_por_pixel, int _profundidad_maxima, const lista_chocable & _mundo, const camara & _cam, int _cantidad_hilos){
+	escena(){}
+
+	escena(int _ancho, int _alto, const color & _fondo, int _muestras_por_pixel, int _profundidad_maxima, const lista_chocable & _mundo, const camara & _cam){
 		ancho= _ancho;
 		alto= _alto;
+		fondo= _fondo;
 		muestras_por_pixel= _muestras_por_pixel;
 		profundidad_maxima= _profundidad_maxima;
 		mundo = _mundo;
 		cam= _cam;
-		cantidad_hilos = _cantidad_hilos;
 		total_pixeles = ancho * alto;
 		}
 	
 	
 public:
-	int ancho, alto, muestras_por_pixel, profundidad_maxima, total_pixeles, cantidad_hilos;
+	int ancho, alto, muestras_por_pixel, profundidad_maxima, total_pixeles;
+	color fondo;
 	lista_chocable mundo;
 	camara cam;
 	
