@@ -13,13 +13,16 @@
 #include "medio_constante.h"
 #include "escena.h"
 
+
 #include <ctime>
 #include <cstdio>
 #include<iostream>
-#include <mpi.h>
+#include <thread>
 
 using namespace std;
-void ejecutar(const escena & esc,int argc, char** argv);
+
+
+void ejecutar(const escena & esc);
 
 lista_chocable escena_aleatoria2(){
 	lista_chocable mundo;
@@ -380,12 +383,7 @@ void algoritmo(const escena & esc, const int& muestras_por_pixel, shared_ptr<vec
 
 }
 
-
-
-
-
-
-int main(int argc, char** argv) {
+int main() {
 	
 	// archivo y parametros
 
@@ -420,10 +418,6 @@ int main(int argc, char** argv) {
 			mirar_desde = punto3(13,2,13);
 			mirar_hacia = punto3(0,0,0);
 			fov_vertical = 20.0;
-
-			// relacion_de_aspecto = 1.0;
-			// ancho = 100;
-			// muestras_por_pixel = 201;
 			break;
 		case 3:
 			mundo = dos_esferas_perlin();
@@ -461,7 +455,7 @@ int main(int argc, char** argv) {
 			mundo = caja_cornell_humo();
 			relacion_de_aspecto = 1.0;
 			ancho = 300;
-			muestras_por_pixel = 200;
+			muestras_por_pixel = 10;
 			fondo = color(0,0,0);
 			mirar_desde = punto3(278,278,-800);
 			mirar_hacia = punto3(278,278,0);
@@ -507,118 +501,53 @@ int main(int argc, char** argv) {
 	auto distancia_focal = 10;//(mirar_desde - mirar_hacia).longitud();
 	camara cam(mirar_desde,mirar_hacia,vup,fov_vertical,relacion_de_aspecto,apertura,distancia_focal,0.0,1.0);
 
+	
 	// programa
 
 	escena mi_escena = escena(ancho,alto,fondo,muestras_por_pixel,profundidad_maxima,mundo,cam);
 
-	ejecutar(mi_escena,argc,argv);	
+	ejecutar(mi_escena);
 }
 
 
-
-void ejecutar(const escena & esc, int argc, char** argv){
-
+void ejecutar(const escena & esc){
 
 	time_t inicio_ejecucion,fin_ejecucion;
 	time(&inicio_ejecucion);
 
-
-	int process_rank, size_of_cluster=1;
-	MPI_Datatype mpi_color, mpi_imagen;
-	
-	//iniciar MPI
-	MPI_Init(&argc,&argv);
-	MPI_Comm_size(MPI_COMM_WORLD, &size_of_cluster);
-
-	//crear tipo color
-	struct struct_color{
-		double e[3];
-	};
-	MPI_Type_contiguous(3, MPI_DOUBLE, &mpi_color);
-	MPI_Type_commit(&mpi_color);
-
-
-	//crear tipo imagen
-	MPI_Type_contiguous(esc.total_pixeles,mpi_color,&mpi_imagen);
-	MPI_Type_commit(&mpi_imagen);
-
-	//variables
-	struct_color *simagen = new struct_color [esc.total_pixeles];
-	struct_color *simagenes = new struct_color [esc.total_pixeles*size_of_cluster];
-	shared_ptr<vector<color>> imagen = make_shared<vector<color>>(esc.total_pixeles,color(0,0,0));
-
-	//calcular cuantas muestras tendra cada worker
-	int operaciones_por_hilo = esc.muestras_por_pixel/size_of_cluster;
-	vector<int> muestras(size_of_cluster,operaciones_por_hilo);
-	int modulo = esc.muestras_por_pixel%size_of_cluster; 
+	int cantidad_hilos = thread::hardware_concurrency();
+	vector<thread> hilos(cantidad_hilos);
+	vector<shared_ptr<vector<color>>> imagenes(cantidad_hilos);
+	int operaciones_por_hilo = esc.muestras_por_pixel/cantidad_hilos;
+	vector<int> muestras(cantidad_hilos,operaciones_por_hilo);
+	int modulo =esc.muestras_por_pixel%cantidad_hilos; 
 	if(modulo!=0){
 		muestras.back()+=modulo;
 	}
 
-	//fork
-	int cantidad_hilos = size_of_cluster;
-	MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
-
-	//mensaje de inicio
-	for(int i = 0; i < size_of_cluster; i++){
-		if(i == process_rank){
-	        fprintf(stderr,"Worker %d conectado. Me encargo de %d muestras\n", process_rank, muestras.at(process_rank));
-	    }
+	int contador = 0;
+	for(thread &h : hilos){
+		imagenes.at(contador)=make_shared<vector<color>>(esc.total_pixeles,color(0,0,0));
+		h = thread(algoritmo,esc,muestras.at(contador),imagenes.at(contador));
+		contador++;
 	}
+	for(thread &h : hilos)
+		h.join();
 
-	//ejecutar algoritmo
-	algoritmo(esc,muestras.at(process_rank),imagen);
-
-	//copiar resultado de algoritmo al arreglo de struct
-	for(int i=0; i<esc.total_pixeles; i++){
-		for(int j=0; j<3; j++){
-			simagen[i].e[j]=imagen.get()->at(i)[j];
+	for(int p = 0; p<esc.total_pixeles; p++){
+		color pixel_color(0,0,0);
+		for(int i=0;i<cantidad_hilos;i++){
+			pixel_color+=imagenes.at(i)->at(p);
 		}
+		escribir_color(cout,pixel_color,esc.muestras_por_pixel);
 	}
 
-	//mensaje de fin
-	for(int i = 0; i < size_of_cluster; i++){
-		if(i == process_rank){
-	        fprintf(stderr,"Worker %d finalizado.\n", process_rank);
-	    }
-	}
 
-	//reunir todas las imagenes
-	if(process_rank==0){
-		MPI_Gather(simagen,1,mpi_imagen,simagenes,1,mpi_imagen,0,MPI_COMM_WORLD);
-	}
-	else{
-		MPI_Gather(simagen,1,mpi_imagen,NULL,0,mpi_imagen,0,MPI_COMM_WORLD);
-	}
-	MPI_Barrier(MPI_COMM_WORLD);
-
-	//calcular promedio y guardar en archivo
-	if(process_rank==0){
-		color pixel_color;
-		color aux;
-		for(int p = 0; p<esc.total_pixeles; p++){
-			pixel_color= color(0,0,0);
-			for(int i=0;i<cantidad_hilos;i++){
-				aux= color(simagenes[i*esc.total_pixeles+p].e[0], 
-						   simagenes[i*esc.total_pixeles+p].e[1],
-						   simagenes[i*esc.total_pixeles+p].e[2]);
-				pixel_color+=aux;
-			}
-		escribir_color(cout,pixel_color, esc.muestras_por_pixel);
-		}
-
-	}
-
-	delete[] simagenes;
-	delete[] simagen;
-	
-	if(process_rank==0){
-		time(&fin_ejecucion);
-		double tiempo_transcurrido = (double) fin_ejecucion - inicio_ejecucion;
-		fprintf(stderr,"\nTiempo transcurrido: %.1f",tiempo_transcurrido);
-		cerr << "\nDone.\n";
-	}
-
-	MPI_Finalize();
+	time(&fin_ejecucion);
+	double tiempo_transcurrido = (double) fin_ejecucion - inicio_ejecucion;
+	fprintf(stderr,"\nTiempo transcurrido: %.1f",tiempo_transcurrido);
+	cerr << "\nDone.\n";
 
 }
+
+

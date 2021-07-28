@@ -11,6 +11,7 @@
 #include "aarect.h"
 #include "caja.h"
 #include "medio_constante.h"
+#include "escena.h"
 
 #include <ctime>
 #include <cstdio>
@@ -18,6 +19,7 @@
 #include <mpi.h>
 
 using namespace std;
+void ejecutar(const escena & esc,int argc, char** argv);
 
 lista_chocable escena_aleatoria2(){
 	lista_chocable mundo;
@@ -93,11 +95,11 @@ lista_chocable caja_cornell(){
 	
 	auto luz = make_shared<luz_difusa>(color(15,15,15));
 
-	// objetos.agregar(make_shared<rectangulo_yz>(0,555,0,555,555,verde));
-	// objetos.agregar(make_shared<rectangulo_yz>(0,555,0,555,0,rojo));
+	objetos.agregar(make_shared<rectangulo_yz>(0,555,0,555,555,verde));
+	objetos.agregar(make_shared<rectangulo_yz>(0,555,0,555,0,rojo));
 
-	// objetos.agregar(make_shared<rectangulo_xz>(0,555,0,555,0,blanco));
-	// objetos.agregar(make_shared<rectangulo_xz>(0,555,0,555,555,blanco));
+	objetos.agregar(make_shared<rectangulo_xz>(0,555,0,555,0,blanco));
+	objetos.agregar(make_shared<rectangulo_xz>(0,555,0,555,555,blanco));
 	objetos.agregar(make_shared<rectangulo_xy>(0,555,0,555,555,blanco));
 
 	objetos.agregar(make_shared<rectangulo_xz>(213,343,227,332,554,luz));
@@ -105,13 +107,13 @@ lista_chocable caja_cornell(){
 	shared_ptr<chocable> caja1 = make_shared<caja>(punto3(0,0,0),punto3(165,330,165),blanco);
 	caja1 = make_shared<rotar_y>(caja1,15);
 	caja1 = make_shared<trasladar>(caja1,vec3(265,0,295));
-	// objetos.agregar(caja1);
+	objetos.agregar(caja1);
 
 	shared_ptr<chocable> caja2 = make_shared<caja>(punto3(0,0,0),punto3(165,165,165),blanco);
 	caja2 = make_shared<rotar_y>(caja2,-18);
 	caja2 = make_shared<trasladar>(caja2,vec3(130,0,65));
 
-	// objetos.agregar(caja2);
+	objetos.agregar(caja2);
 
 
 
@@ -351,11 +353,11 @@ color color_de_rayo(const rayo& r, const chocable& mundo, int profundidad){
 	// 0.5,0.7,1.0 es azul
 }
 
-void algoritmo(const int& ancho, const int& alto,  const color& fondo, const lista_chocable& mundo, const camara& cam, const int& profundidad_maxima, const int& muestras_por_pixel, shared_ptr<vector<color>> imagen){
+void algoritmo(const escena & esc, const int& muestras_por_pixel, shared_ptr<vector<color>> imagen){
 	int contador =0;
-	for (int j = alto -1; j >= 0; --j) {
+	for (int j = esc.alto -1; j >= 0; --j) {
 		// cerr << "\rScanlines remaining: " << j << ' ' << flush;
-		for (int i = 0; i < ancho; ++i) {
+		for (int i = 0; i < esc.ancho; ++i) {
 			
 			color pixel_color(0,0,0);
 				
@@ -364,11 +366,11 @@ void algoritmo(const int& ancho, const int& alto,  const color& fondo, const lis
 			//aqui solo se acumula la suma, pero en escribir_color, se divide
 			//por la cantidad de muestras
 
-			for(int s = 0; s < muestras_por_pixel; ++s){
-				auto u = (i + double_aleatorio()) / (ancho-1);
-				auto v = (j + double_aleatorio()) / (alto-1);
-				rayo r = cam.get_rayo(u,v);
-				pixel_color += color_de_rayo(r,fondo,mundo, profundidad_maxima);
+			for(int s = 0; s < esc.muestras_por_pixel; ++s){
+				auto u = (i + double_aleatorio()) / (esc.ancho-1);
+				auto v = (j + double_aleatorio()) / (esc.alto-1);
+				rayo r = esc.cam.get_rayo(u,v);
+				pixel_color += color_de_rayo(r,esc.fondo,esc.mundo, esc.profundidad_maxima);
 			}
 			imagen->at(contador)= pixel_color;
 			contador++;
@@ -448,8 +450,8 @@ int main(int argc, char** argv) {
 		case 6:
 			mundo = caja_cornell();
 			relacion_de_aspecto = 1.0;
-			ancho = 20;
-			muestras_por_pixel = 10000;
+			ancho = 200;
+			muestras_por_pixel = 200;
 			fondo = color(0,0,0);
 			mirar_desde = punto3(278,278,-800);
 			mirar_hacia = punto3(278,278,0);
@@ -505,64 +507,50 @@ int main(int argc, char** argv) {
 	auto distancia_focal = 10;//(mirar_desde - mirar_hacia).longitud();
 	camara cam(mirar_desde,mirar_hacia,vup,fov_vertical,relacion_de_aspecto,apertura,distancia_focal,0.0,1.0);
 
-
-	struct struct_color{
-		double e[3];
-	};
-
-	struct struct_imagen{
-		double e[3];
-		struct struct_color pixels[];
-	};
 	// programa
+
+	escena mi_escena = escena(ancho,alto,fondo,muestras_por_pixel,profundidad_maxima,mundo,cam);
+
+	ejecutar(mi_escena,argc,argv);	
+}
+
+
+
+void ejecutar(const escena & esc, int argc, char** argv){
+
 
 	time_t inicio_ejecucion,fin_ejecucion;
 	time(&inicio_ejecucion);
 
-	int process_rank, size_of_cluster=1;
 
+	int process_rank, size_of_cluster=1;
 	MPI_Datatype mpi_color, mpi_imagen;
 	
+	//iniciar MPI
 	MPI_Init(&argc,&argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &size_of_cluster);
 
 	//crear tipo color
+	struct struct_color{
+		double e[3];
+	};
 	MPI_Type_contiguous(3, MPI_DOUBLE, &mpi_color);
 	MPI_Type_commit(&mpi_color);
 
 
 	//crear tipo imagen
-	MPI_Type_contiguous(1 + ancho*alto,mpi_color,&mpi_imagen);
+	MPI_Type_contiguous(esc.total_pixeles,mpi_color,&mpi_imagen);
 	MPI_Type_commit(&mpi_imagen);
 
 	//variables
-	int tamanio = sizeof(struct_imagen) + (ancho*alto * sizeof(struct_color));
-	// struct struct_imagen *simagen = (struct_imagen*)malloc(tamanio);
-	struct struct_imagen *simagen = (struct struct_imagen*)malloc(tamanio);
-	// simagen->vacio={0,0,0};
-	if(simagen==NULL){
-		cerr << "memory not allocated\n";
-		exit(0);
-	}
-	// struct struct_imagen *simagenes = (struct_imagen*)malloc(size_of_cluster*tamanio);
-	struct struct_imagen *simagenes = (struct struct_imagen*)calloc(size_of_cluster,tamanio);
-	if(simagenes==NULL){
-		cerr << "memory not allocated\n";
-		exit(0);
-	}
-	shared_ptr<vector<color>> imagen = make_shared<vector<color>>(ancho*alto,color(0,0,0));
-
-	cerr << "cluster size " << size_of_cluster << endl;
-	cerr << "tamanio  = " << tamanio << endl;
-	cerr << "struct color = " << sizeof(struct_color) << endl;
-	cerr << "struct imagen = " << sizeof(struct_imagen) << endl;
-	// cerr << "tam simagen2 = " << sizeof(&simagen) << endl;
-	// cerr << "tam simagenes = " << sizeof(simagenes) << endl;
+	struct_color *simagen = new struct_color [esc.total_pixeles];
+	struct_color *simagenes = new struct_color [esc.total_pixeles*size_of_cluster];
+	shared_ptr<vector<color>> imagen = make_shared<vector<color>>(esc.total_pixeles,color(0,0,0));
 
 	//calcular cuantas muestras tendra cada worker
-	int operaciones_por_hilo = muestras_por_pixel/size_of_cluster;
+	int operaciones_por_hilo = esc.muestras_por_pixel/size_of_cluster;
 	vector<int> muestras(size_of_cluster,operaciones_por_hilo);
-	int modulo =muestras_por_pixel%size_of_cluster; 
+	int modulo = esc.muestras_por_pixel%size_of_cluster; 
 	if(modulo!=0){
 		muestras.back()+=modulo;
 	}
@@ -571,6 +559,7 @@ int main(int argc, char** argv) {
 	int cantidad_hilos = size_of_cluster;
 	MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 
+	//mensaje de inicio
 	for(int i = 0; i < size_of_cluster; i++){
 		if(i == process_rank){
 	        fprintf(stderr,"Worker %d conectado. Me encargo de %d muestras\n", process_rank, muestras.at(process_rank));
@@ -578,15 +567,16 @@ int main(int argc, char** argv) {
 	}
 
 	//ejecutar algoritmo
-	algoritmo(ancho,alto,fondo,mundo,cam,profundidad_maxima,muestras.at(process_rank),imagen);
+	algoritmo(esc,muestras.at(process_rank),imagen);
 
-	//copiar resultado de algorimo al struct
-	for(int i=0; i<ancho*alto; i++){
+	//copiar resultado de algoritmo al arreglo de struct
+	for(int i=0; i<esc.total_pixeles; i++){
 		for(int j=0; j<3; j++){
-			simagen->pixels[i].e[j]=imagen.get()->at(i)[j];
+			simagen[i].e[j]=imagen.get()->at(i)[j];
 		}
 	}
 
+	//mensaje de fin
 	for(int i = 0; i < size_of_cluster; i++){
 		if(i == process_rank){
 	        fprintf(stderr,"Worker %d finalizado.\n", process_rank);
@@ -602,63 +592,33 @@ int main(int argc, char** argv) {
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
 
-	//calcular promedio
+	//calcular promedio y guardar en archivo
 	if(process_rank==0){
 		color pixel_color;
 		color aux;
-		for(int p = 0; p<ancho*alto; p++){
+		for(int p = 0; p<esc.total_pixeles; p++){
 			pixel_color= color(0,0,0);
 			for(int i=0;i<cantidad_hilos;i++){
-				aux= color(simagenes[i].pixels[p].e[0], 
-						  		 simagenes[i].pixels[p].e[1],
-						  		 simagenes[i].pixels[p].e[2]);
-				// cerr << i << " " << aux.x() << " " <<  aux.y() <<" " << aux.z() << endl;
+				aux= color(simagenes[i*esc.total_pixeles+p].e[0], 
+						   simagenes[i*esc.total_pixeles+p].e[1],
+						   simagenes[i*esc.total_pixeles+p].e[2]);
 				pixel_color+=aux;
 			}
-		escribir_color(cout,pixel_color,muestras_por_pixel);
+		escribir_color(cout,pixel_color, esc.muestras_por_pixel);
 		}
 
+	}
+
+	delete[] simagenes;
+	delete[] simagen;
+	
+	if(process_rank==0){
 		time(&fin_ejecucion);
 		double tiempo_transcurrido = (double) fin_ejecucion - inicio_ejecucion;
 		fprintf(stderr,"\nTiempo transcurrido: %.1f",tiempo_transcurrido);
 		cerr << "\nDone.\n";
-
-
 	}
 
-	// delete[] simagenes;
-	free(simagenes);
-	free(simagen);
 	MPI_Finalize();
-	/*int cantidad_hilos = thread::hardware_concurrency();
-	vector<thread> hilos(cantidad_hilos);
-	vector<shared_ptr<vector<color>>> imagenes(cantidad_hilos);
-	int operaciones_por_hilo = muestras_por_pixel/cantidad_hilos;
-	vector<int> muestras(cantidad_hilos,operaciones_por_hilo);
-	int modulo =muestras_por_pixel%cantidad_hilos; 
-	if(modulo!=0){
-		muestras.back()+=modulo;
-	}
 
-	int contador = 0;
-	for(thread &h : hilos){
-		imagenes.at(contador)=make_shared<vector<color>>(ancho*alto,color(0,0,0));
-		h = thread(algoritmo,ancho,alto,fondo,mundo,cam,profundidad_maxima,muestras.at(contador),imagenes.at(contador));
-		contador++;
-	}
-	for(thread &h : hilos)
-		h.join();
-
-	for(int p = 0; p<ancho*alto; p++){
-		color pixel_color(0,0,0);
-		for(int i=0;i<cantidad_hilos;i++){
-			pixel_color+=imagenes.at(i)->at(p);
-		}
-		escribir_color(cout,pixel_color,muestras_por_pixel);
-	}
-	*/
-	
 }
-
-
-

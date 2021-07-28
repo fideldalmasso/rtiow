@@ -3,12 +3,30 @@ Implementacion propia de los dos primeros libros sobre raytracing de Peter Shirl
 
 # Diferencias con el libro
 * Ejecución en múltiples hilos (tantos como sea posible)
+* Ejecución distribuida con Open MPI
 * Codeado en español
 * Documentación sobre las matemáticas más heavies
 
-# Cómo ejecutar
-`gcc main.cpp -o Debug2/rtiow.bin -I. -std=c++14 -lm -lstdc++ --pedantic-errors -O3 -lpthread && cd Debug2 && ./rtiow.bin && cd ..`
+# Cómo ejecutar en forma normal
+```
+make normal
+./rtiow_normal.bin
+```
 
+# Cómo ejecutar con Open MPI
+Primero es necesario tener configurado una topología con Open MPI instalado en cada nodo y modificar el archivo host_file de acuerdo a esta. Cada nodo debe ser accesible con ssh desde el nodo donde se ejecutará el programa. 
+
+Para más información sobre cómo instalar y configurar Open MPI sobre una red LAN:
+* https://www.open-mpi.org/faq/?category=building  
+* https://mpitutorial.com/tutorials/running-an-mpi-cluster-within-a-lan/
+* https://mpitutorial.com/tutorials/mpi-hello-world/
+
+Para compilar y ejecutar:
+```
+make distribuido
+mpirun -np 3 -hostfile host_file ./rtiow_distribuido.bin
+```
+Nota: la opción -np indica el número de workers que usará MPI para distribuir la ejecución del programa.
 # Capturas del proceso
 
 <img src="imagenes/00.jpg" width="400"/>
