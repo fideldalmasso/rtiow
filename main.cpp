@@ -11,12 +11,13 @@
 #include "aarect.h"
 #include "caja.h"
 #include "medio_constante.h"
+#include "escena.h"
+
 
 #include <ctime>
 #include <cstdio>
 #include<iostream>
 #include <thread>
-#include <mpi.h>
 
 using namespace std;
 
@@ -379,11 +380,11 @@ void algoritmo(const int& ancho, const int& alto,  const color& fondo, const lis
 
 }
 
-int main(int argc, char** argv) {
+int main() {
 	
 	// archivo y parametros
 
-	freopen("../out.ppm", "w", stdout);
+	freopen("out.ppm", "w", stdout);
 	auto relacion_de_aspecto = 16.0 / 9.0;
 	int ancho = 300;
 	int muestras_por_pixel  = 10;
@@ -399,7 +400,7 @@ int main(int argc, char** argv) {
 	auto fov_vertical = 40.0;
 	color fondo(0,0,0);
 
-	switch(0){
+	switch(6){
 		case 1:
 			mundo = escena_aleatoria();
 			fondo = color(0.7,0.8,1.0);
@@ -440,7 +441,7 @@ int main(int argc, char** argv) {
 		case 6:
 			mundo = caja_cornell();
 			relacion_de_aspecto = 1.0;
-			ancho = 1000;
+			ancho = 200;
 			muestras_por_pixel = 200;
 			fondo = color(0,0,0);
 			mirar_desde = punto3(278,278,-800);
@@ -504,9 +505,6 @@ int main(int argc, char** argv) {
 	time_t inicio_ejecucion,fin_ejecucion;
 	time(&inicio_ejecucion);
 
-
-
-
 	int cantidad_hilos = thread::hardware_concurrency();
 	vector<thread> hilos(cantidad_hilos);
 	vector<shared_ptr<vector<color>>> imagenes(cantidad_hilos);
@@ -516,28 +514,6 @@ int main(int argc, char** argv) {
 	if(modulo!=0){
 		muestras.back()+=modulo;
 	}
-
-	int tamanio_cluster, rango;
-
-	MPI_Datatype mpi_color;
-	MPI_Type_contiguous(3, MPI_DOUBLE, &mpi_color);
-
-	MPI_Datatype mpi_imagen;
-	MPI_Type_contiguous(ancho*alto, mpi_color, &mpi_imagen);
-	
- 	MPI_Init(&argc,&argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &tamanio_cluster);
-    cantidad_hilos=tamanio_cluster;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rango); 				//fork
-
-
-    if(rango==0){ //padre
-
-    }
-    else {		  //hijo
-
-    }
-
 
 	int contador = 0;
 	for(thread &h : hilos){
@@ -555,35 +531,6 @@ int main(int argc, char** argv) {
 		}
 		escribir_color(cout,pixel_color,muestras_por_pixel);
 	}
-
-
-
-	// int cantidad_hilos = thread::hardware_concurrency();
-	// vector<thread> hilos(cantidad_hilos);
-	// vector<shared_ptr<vector<color>>> imagenes(cantidad_hilos);
-	// int operaciones_por_hilo = muestras_por_pixel/cantidad_hilos;
-	// vector<int> muestras(cantidad_hilos,operaciones_por_hilo);
-	// int modulo =muestras_por_pixel%cantidad_hilos; 
-	// if(modulo!=0){
-	// 	muestras.back()+=modulo;
-	// }
-
-	// int contador = 0;
-	// for(thread &h : hilos){
-	// 	imagenes.at(contador)=make_shared<vector<color>>(ancho*alto,color(0,0,0));
-	// 	h = thread(algoritmo,ancho,alto,fondo,mundo,cam,profundidad_maxima,muestras.at(contador),imagenes.at(contador));
-	// 	contador++;
-	// }
-	// for(thread &h : hilos)
-	// 	h.join();
-
-	// for(int p = 0; p<ancho*alto; p++){
-	// 	color pixel_color(0,0,0);
-	// 	for(int i=0;i<cantidad_hilos;i++){
-	// 		pixel_color+=imagenes.at(i)->at(p);
-	// 	}
-	// 	escribir_color(cout,pixel_color,muestras_por_pixel);
-	// }
 
 	time(&fin_ejecucion);
 	double tiempo_transcurrido = (double) fin_ejecucion - inicio_ejecucion;
