@@ -13,14 +13,12 @@
 #include "medio_constante.h"
 #include "escena.h"
 
-
 #include <ctime>
 #include <cstdio>
-#include<iostream>
+#include <iostream>
 #include <thread>
 
 using namespace std;
-
 
 void ejecutar(const escena & esc);
 
@@ -34,7 +32,6 @@ lista_chocable escena_aleatoria2(){
 	lista_chocable objetos;
 	objetos.agregar(make_shared<nodo_bvh>(mundo,0,0));
 	return objetos;
-
 }
 
 lista_chocable dos_esferas(){
@@ -356,7 +353,10 @@ color color_de_rayo(const rayo& r, const chocable& mundo, int profundidad){
 	// 0.5,0.7,1.0 es azul
 }
 
-void algoritmo(const escena & esc, const int& muestras_por_pixel, shared_ptr<vector<color>> imagen){
+void algoritmo(int id, const escena & esc, const int& muestras_por_hilo, shared_ptr<vector<color>> imagen){
+	
+	fprintf(stderr,"Thread %d conectado. Me encargo de %d muestras\n", id, muestras_por_hilo);
+
 	int contador =0;
 	for (int j = esc.alto -1; j >= 0; --j) {
 		// cerr << "\rScanlines remaining: " << j << ' ' << flush;
@@ -369,7 +369,7 @@ void algoritmo(const escena & esc, const int& muestras_por_pixel, shared_ptr<vec
 			//aqui solo se acumula la suma, pero en escribir_color, se divide
 			//por la cantidad de muestras
 
-			for(int s = 0; s < esc.muestras_por_pixel; ++s){
+			for(int s = 0; s < muestras_por_hilo; ++s){
 				auto u = (i + double_aleatorio()) / (esc.ancho-1);
 				auto v = (j + double_aleatorio()) / (esc.alto-1);
 				rayo r = esc.cam.get_rayo(u,v);
@@ -377,9 +377,10 @@ void algoritmo(const escena & esc, const int& muestras_por_pixel, shared_ptr<vec
 			}
 			imagen->at(contador)= pixel_color;
 			contador++;
-			// escribir_color(cout,pixel_color, muestras_por_pixel);
 		}
 	}
+
+	fprintf(stderr,"Thread %d finalizado.\n", id);
 
 }
 
@@ -391,7 +392,7 @@ int main() {
 	auto relacion_de_aspecto = 16.0 / 9.0;
 	int ancho = 300;
 	int muestras_por_pixel  = 10;
-	int profundidad_maxima = 10;
+	int profundidad_maxima = 100;
 	bool mostrar_ejes = false;
 
 	//mundo
@@ -444,8 +445,8 @@ int main() {
 		case 6:
 			mundo = caja_cornell();
 			relacion_de_aspecto = 1.0;
-			ancho = 200;
-			muestras_por_pixel = 200;
+			ancho = 400;
+			muestras_por_pixel = 100;
 			fondo = color(0,0,0);
 			mirar_desde = punto3(278,278,-800);
 			mirar_hacia = punto3(278,278,0);
@@ -496,16 +497,12 @@ int main() {
 	cout << "P3\n" << ancho << ' ' << alto << "\n255\n";
 
 	//camara
-
 	vec3 vup(0,1,0);
 	auto distancia_focal = 10;//(mirar_desde - mirar_hacia).longitud();
 	camara cam(mirar_desde,mirar_hacia,vup,fov_vertical,relacion_de_aspecto,apertura,distancia_focal,0.0,1.0);
 
-	
 	// programa
-
 	escena mi_escena = escena(ancho,alto,fondo,muestras_por_pixel,profundidad_maxima,mundo,cam);
-
 	ejecutar(mi_escena);
 }
 
@@ -528,7 +525,7 @@ void ejecutar(const escena & esc){
 	int contador = 0;
 	for(thread &h : hilos){
 		imagenes.at(contador)=make_shared<vector<color>>(esc.total_pixeles,color(0,0,0));
-		h = thread(algoritmo,esc,muestras.at(contador),imagenes.at(contador));
+		h = thread(algoritmo,contador,esc,muestras.at(contador),imagenes.at(contador));
 		contador++;
 	}
 	for(thread &h : hilos)
@@ -545,7 +542,7 @@ void ejecutar(const escena & esc){
 
 	time(&fin_ejecucion);
 	double tiempo_transcurrido = (double) fin_ejecucion - inicio_ejecucion;
-	fprintf(stderr,"\nTiempo transcurrido: %.1f",tiempo_transcurrido);
+	fprintf(stderr,"\nTiempo transcurrido: %.1f segundos",tiempo_transcurrido);
 	cerr << "\nDone.\n";
 
 }
