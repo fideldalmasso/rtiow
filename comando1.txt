@@ -1,0 +1,24 @@
+set pagination off
+set print addr off
+set print frame-arguments none
+break 400
+continue
+set var i = 7
+set $pid = getpid()
+rbreak /root/cloud/ompi/opal/mca/btl/tipc/btl_tipc.c:.
+rbreak /root/cloud/ompi/opal/mca/btl/tipc/btl_tipc_component.c:.
+rbreak /root/cloud/ompi/opal/mca/btl/tipc/btl_tipc_endpoint.c:.
+rbreak /root/cloud/ompi/opal/mca/btl/tipc/btl_tipc_frag.c:.
+rbreak /root/cloud/ompi/opal/mca/btl/tipc/btl_tipc_proc.c:.
+
+commands 1-54
+silent
+where 1
+continue
+end
+
+eval "set logging file log/comando1_pid%i.log", $pid
+set logging overwrite on
+set logging on
+
+continue

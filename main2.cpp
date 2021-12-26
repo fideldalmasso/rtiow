@@ -18,6 +18,11 @@
 #include <iostream>
 #include <mpi.h>
 
+
+#include <sys/types.h>
+#include <unistd.h>
+
+
 using namespace std;
 
 void ejecutar(const escena & esc,int argc, char** argv);
@@ -386,6 +391,15 @@ void algoritmo(int id, const escena & esc, const int& muestras_por_hilo, shared_
 
 int main(int argc, char** argv) {
 	
+	{
+    volatile int i = 0;
+    char hostname[256];
+    gethostname(hostname, sizeof(hostname));
+    printf("PID %d on %s ready for attach\n", getpid(), hostname);
+    fflush(stdout);
+    while (0 == i)
+        sleep(5);
+}
 	// archivo y parametros
 
 	freopen("out.ppm", "w", stdout);
@@ -445,8 +459,8 @@ int main(int argc, char** argv) {
 		case 6:
 			mundo = caja_cornell();
 			relacion_de_aspecto = 1.0;
-			ancho = 400;
-			muestras_por_pixel = 100;
+			ancho = 200;
+			muestras_por_pixel = 10;
 			fondo = color(0,0,0);
 			mirar_desde = punto3(278,278,-800);
 			mirar_hacia = punto3(278,278,0);
@@ -519,7 +533,8 @@ void ejecutar(const escena & esc, int argc, char** argv){
 	MPI_Datatype mpi_color, mpi_imagen;
 	
 	//iniciar MPI
-	MPI_Init(&argc,&argv);
+	int provided;
+	MPI_Init_thread(&argc,&argv, MPI_THREAD_SINGLE, &provided);
 	MPI_Comm_size(MPI_COMM_WORLD, &size_of_cluster);
 
 	//crear tipo color

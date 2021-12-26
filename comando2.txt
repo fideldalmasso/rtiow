@@ -1,0 +1,16 @@
+set pagination off
+set print addr off
+set print frame-arguments none
+break 400
+continue
+set var i = 7
+set $pid = getpid()
+
+b mca_btl_tipc_create
+b split_and_resolve
+b mca_btl_tipc_component_create_instances
+b mca_btl_tipc_component_create_listen
+b mca_btl_tipc_endpoint_start_connect 
+b mca_btl_tipc_component_init
+
+continue

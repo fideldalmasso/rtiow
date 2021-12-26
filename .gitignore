@@ -1,7 +1,10 @@
 **/Debug
 **/Release
 **/Debug2
+**/log
 out*.ppm
 *.exe
 *.o
 *.bin
+core
+gdb.txt
